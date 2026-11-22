@@ -21,5 +21,5 @@ ExportToExcel.ps1   Reads the item lines from the saved data file and writes
 
 Tip: right-click ExportToExcel.cmd > Send to > Desktop (create shortcut) to run it from your desktop.
 
-AI disclosure: most of this code was written with an AI coding assistant (Claude by Anthropic), working
+AI disclosure: this code was written with the assistance of an AI coding assistant (Claude by Anthropic), working
 from my designs and instructions. I test it on my own PC and maintain it.

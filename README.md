@@ -1,6 +1,6 @@
 # Fury's Inventory Ledger
 
-**AI disclosure:** Most of this addon's code was written with an AI coding assistant (Claude by Anthropic), working from my designs and instructions. I test every release in game on my own characters before it goes up, and I maintain it.
+**AI disclosure:** This addon's code was written with the assistance of an AI coding assistant (Claude by Anthropic), working from my designs and instructions. I test every release in game on my own characters before it goes up, and I maintain it.
 
 An Elder Scrolls Online addon: every item you own in one list. Every character's bags and gear, the bank, craft bag, house storage, Furniture Vault, furniture placed in your houses, and your currencies, with a summary page, an in-game copy window and an Excel export.
 

@@ -1,6 +1,6 @@
 # Fury's Inventory Ledger
 
-**AI disclosure:** Most of this addon's code was written with an AI coding assistant (Claude by Anthropic), working from my designs and instructions. I test every release in game on my own characters before it goes up, and I maintain it. Please report any problem in the comments.
+**AI disclosure:** This addon's code was written with the assistance of an AI coding assistant (Claude by Anthropic), working from my designs and instructions. I test every release in game on my own characters before it goes up, and I maintain it. Please report any problem in the comments.
 
 Every item you own in one list: every character's bags and gear, the bank, the craft bag, house storage,
 the Furniture Vault, furniture placed in your houses, and your currencies. See it all on a summary page
