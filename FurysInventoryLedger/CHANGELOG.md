@@ -3,6 +3,7 @@
 ## 1.2.1
 - Summary page: the account and "characters scanned" line sits under the title again instead of over the Currencies table.
 - Summary and copy windows now have a solid background, so other windows and addons behind them no longer show through.
+- Currencies table: account-wide currencies are listed under Bank, so the separate Account column is gone.
 - Mythic items now show as "Mythic" under By quality on the summary page and in the Quality column of the copy window and export (they were left blank).
 
 ## 1.2.0

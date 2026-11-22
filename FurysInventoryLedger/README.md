@@ -30,7 +30,7 @@ Identical stacks in the same place are added together. Stolen copies get their o
 
 - **Tiles:** total items, different items, stacks, gold, vendor value and characters scanned, with the
   change since yesterday.
-- **Currencies:** every currency on characters, in the bank and account-wide, with the total and how much it
+- **Currencies:** every currency on characters and in the bank (account-wide ones count as bank), with the total and how much it
   changed since yesterday and over the last 7 days. Currencies update the moment they change.
 - **Where it is:** items, stacks, vendor value and share for each place (characters, companions, bank,
   craft bag, house storage, Furniture Vault, placed furniture).

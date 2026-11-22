@@ -314,8 +314,7 @@ local function Draw()
         curRows[#curRows + 1] = { gold = true, cells = {
             c.name,
             c.chars > 0 and Num(c.chars) or "",
-            c.bank > 0 and Num(c.bank) or "",
-            c.account > 0 and Num(c.account) or "",
+            (c.bank + c.account) > 0 and Num(c.bank + c.account) or "",
             Num(c.total),
             dY and Signed(c.total - dY) or "",
             dW and Signed(c.total - dW) or "",
@@ -325,9 +324,9 @@ local function Draw()
         or "Change columns fill in from tomorrow"
     Section("Currencies", note)
     Table({
-        { "Currency", 230, LEFT }, { "On characters", 120, RIGHT }, { "Bank", 110, RIGHT },
-        { "Account", 110, RIGHT }, { "Total", 120, RIGHT },
-        { "vs " .. SinceLabel(yDay, Day(1), "yesterday"), 115, RIGHT }, { "vs " .. SinceLabel(wDay, Day(7), "7 days"), 115, RIGHT },
+        { "Currency", 260, LEFT }, { "On characters", 140, RIGHT }, { "Bank", 160, RIGHT },
+        { "Total", 140, RIGHT },
+        { "vs " .. SinceLabel(yDay, Day(1), "yesterday"), 110, RIGHT }, { "vs " .. SinceLabel(wDay, Day(7), "7 days"), 110, RIGHT },
     }, curRows)
 
     -- Where it is
