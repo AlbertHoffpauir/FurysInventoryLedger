@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.2
+- Esc now closes the summary and copy windows. They also bring up the mouse cursor when they open, and close when you open another game menu.
+
 ## 1.2.1
 - Summary page: the account and "characters scanned" line sits under the title again instead of over the Currencies table.
 - Summary and copy windows now have a solid background, so other windows and addons behind them no longer show through.

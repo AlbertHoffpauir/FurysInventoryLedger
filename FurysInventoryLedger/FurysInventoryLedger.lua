@@ -7,7 +7,9 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.2.1"
+FIL.version = "1.2.2"
+FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
+FIL.SUMMARY_SCENE = "FurysInventoryLedgerSummary"
 
 local ACCOUNT_OWNER = "(Account)"
 local ROW_MARKER    = "FIL|"     -- prefix on each saved export row, so the PowerShell exporter can find them
@@ -486,7 +488,7 @@ function FIL.OpenWindow()
         "<<1>> rows, <<2>>. Click Select All, press Ctrl+C, paste into Excel. Paste each page under the last.",
         ZO_CommaDelimitNumber(rowCount), sepName))
     ShowPage()
-    win:SetHidden(false)
+    SCENE_MANAGER:Show(FIL.COPY_SCENE)
 end
 
 function FIL.PrevPage() if pageIndex > 1 then pageIndex = pageIndex - 1; ShowPage() end end
@@ -499,7 +501,15 @@ function FIL.SelectAll()
 end
 
 function FIL.CloseWindow()
-    FurysInventoryLedgerWindow:SetHidden(true)
+    if SCENE_MANAGER:IsShowing(FIL.COPY_SCENE) then SCENE_MANAGER:Hide(FIL.COPY_SCENE) end
+end
+
+-- Each window is its own scene, so Esc closes it, the mouse cursor comes up with it,
+-- and opening a game menu (settings, map, inventory) hides it.
+function FIL.CreateScene(sceneName, control)
+    local scene = ZO_Scene:New(sceneName, SCENE_MANAGER)
+    scene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+    scene:AddFragment(ZO_SimpleSceneFragment:New(control))
 end
 
 ------------------------------------------------------------------------------
@@ -549,8 +559,6 @@ end
 
 -- The gear on the copy window, /ledger settings and /ledgersettings all land here.
 function FIL.OpenSettings()
-    FIL.CloseWindow()   -- these windows sit above menus; get them out of the way
-    FIL.CloseSummary()
     LibAddonMenu2:OpenToPanel(settingsPanel)
 end
 
@@ -678,6 +686,9 @@ local function OnLoaded(_, addonName)
         SaveExport(BuildRows())
         FIL.RecordSnapshot()
     end)
+
+    FIL.CreateScene(FIL.COPY_SCENE, FurysInventoryLedgerWindow)
+    FIL.CreateScene(FIL.SUMMARY_SCENE, FurysInventoryLedgerSummary)
 
     SLASH_COMMANDS["/ledger"] = Slash
     BuildSettings()

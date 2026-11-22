@@ -60,7 +60,7 @@
                 <Button name="$(parent)Summary" inherits="ZO_DefaultButton" text="Summary">
                     <Dimensions x="140" y="30" />
                     <Anchor point="RIGHT" relativeTo="$(parent)SelectAll" relativePoint="LEFT" offsetX="-12" />
-                    <OnClicked>FurysInventoryLedger.CloseWindow(); FurysInventoryLedger.OpenSummary()</OnClicked>
+                    <OnClicked>FurysInventoryLedger.OpenSummary()</OnClicked>
                 </Button>
 
                 <Button name="$(parent)SelectAll" inherits="ZO_DefaultButton" text="Select All">

@@ -415,10 +415,9 @@ function FIL.OpenSummary()
     local win = FurysInventoryLedgerSummary
     local scroll = win:GetNamedChild("Body")
     child = scroll:GetNamedChild("ScrollChild")
-    FIL.CloseWindow()
     Draw()
     ZO_Scroll_ResetToTop(scroll)
-    win:SetHidden(false)
+    SCENE_MANAGER:Show(FIL.SUMMARY_SCENE)
 end
 
 function FIL.RefreshSummary()
@@ -426,10 +425,9 @@ function FIL.RefreshSummary()
 end
 
 function FIL.CloseSummary()
-    FurysInventoryLedgerSummary:SetHidden(true)
+    if SCENE_MANAGER:IsShowing(FIL.SUMMARY_SCENE) then SCENE_MANAGER:Hide(FIL.SUMMARY_SCENE) end
 end
 
 function FIL.SummaryToCopy()
-    FIL.CloseSummary()
     FIL.OpenWindow()
 end
