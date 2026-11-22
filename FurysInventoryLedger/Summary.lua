@@ -282,7 +282,7 @@ local function Draw()
     local lastWeek, wDay  = Baseline(history, Day(7))
 
     local win = FurysInventoryLedgerSummary
-    win:GetNamedChild("Sub"):SetText(zo_strformat("<<1>>  |  <<2>> of <<3>> characters scanned",
+    win:GetNamedChild("Sub"):SetText(zo_strformat("<<1>>  -  <<2>> of <<3>> characters scanned",
         FIL.accountKey, #r.chars, GetNumCharacters()))
 
     ResetCanvas()

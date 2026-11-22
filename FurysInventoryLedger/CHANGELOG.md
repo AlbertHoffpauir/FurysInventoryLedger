@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1
+- Summary page: the account and "characters scanned" line sits under the title again instead of over the Currencies table.
+- Summary and copy windows now have a solid background, so other windows and addons behind them no longer show through.
+- Mythic items now show as "Mythic" under By quality on the summary page and in the Quality column of the copy window and export (they were left blank).
+
 ## 1.2.0
 - New summary page, opened by /ledger: totals by location, item type and quality, your 25 most-owned items, and a line per character (carried, equipped, gold, last scanned).
 - Currency running totals: on characters, in the bank and account-wide, with the change since yesterday and over the last 7 days.

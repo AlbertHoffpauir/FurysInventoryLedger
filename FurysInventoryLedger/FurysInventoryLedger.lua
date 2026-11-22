@@ -7,7 +7,7 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.2.0"
+FIL.version = "1.2.1"
 
 local ACCOUNT_OWNER = "(Account)"
 local ROW_MARKER    = "FIL|"     -- prefix on each saved export row, so the PowerShell exporter can find them
@@ -336,7 +336,7 @@ local function LinkInfo(link)
         local hasSet, setName = GetItemLinkSetInfo(link, false)
         info.name    = FormatName(GetItemLinkName(link))
         info.qnum    = GetItemLinkDisplayQuality(link)
-        info.quality = EnumString("SI_ITEMQUALITY", info.qnum)
+        info.quality = EnumString("SI_ITEMDISPLAYQUALITY", info.qnum)
         info.itype   = EnumString("SI_ITEMTYPE", itemType, ITEMTYPE_NONE)
         info.stype   = EnumString("SI_SPECIALIZEDITEMTYPE", specType, SPECIALIZED_ITEMTYPE_NONE)
         info.equip   = EnumString("SI_EQUIPTYPE", equipType, EQUIP_TYPE_INVALID)

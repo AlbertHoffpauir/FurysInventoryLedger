@@ -4,9 +4,10 @@
             <Dimensions x="980" y="760" />
             <Anchor point="CENTER" />
             <Controls>
-                <Backdrop name="$(parent)Bg" centerColor="F00D0D0D" edgeColor="FFC9A227">
+                <Backdrop name="$(parent)Bg" edgeColor="FFC9A227">
                     <AnchorFill />
                     <Edge edgeSize="2" />
+                    <OnInitialized>self:SetCenterColor(0.05, 0.05, 0.05, 1)</OnInitialized>
                 </Backdrop>
 
                 <Label name="$(parent)Title" font="ZoFontWinH2" color="C9A227" text="Fury's Inventory Ledger - Summary">
@@ -28,8 +29,8 @@
                 </Button>
 
                 <Label name="$(parent)Sub" font="ZoFontGame" color="D8D0B8" wrapMode="ELLIPSIS">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="4" />
-                    <Anchor point="RIGHT" offsetX="-20" />
+                    <Dimensions x="940" y="24" />
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="48" />
                 </Label>
 
                 <Control name="$(parent)Body" inherits="ZO_ScrollContainer">
