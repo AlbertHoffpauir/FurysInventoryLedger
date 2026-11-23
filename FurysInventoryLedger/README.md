@@ -83,6 +83,9 @@ or `/ledgersettings`: open the summary, copy window separator (tab or comma), op
 - `/ledger sep tab` | `comma` separator for the copy window
 - `/ledger settings` the settings page
 
+**Keybinds:** Controls > Addon Keybinds > Fury's Inventory Ledger has "Open/close the summary" and
+"Open/close the copy window". Both start unbound; pick your own keys.
+
 ## Notes
 
 - Saved data is account-wide, separate per account and megaserver. Every account that plays on this PC

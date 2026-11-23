@@ -7,9 +7,13 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.2.2"
+FIL.version = "1.2.3"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
 FIL.SUMMARY_SCENE = "FurysInventoryLedgerSummary"
+
+-- Controls > Addon Keybinds (actions in Bindings.xml)
+ZO_CreateStringId("SI_BINDING_NAME_FURYSINVENTORYLEDGER_SUMMARY", "Open/close the summary")
+ZO_CreateStringId("SI_BINDING_NAME_FURYSINVENTORYLEDGER_COPY", "Open/close the copy window")
 
 local ACCOUNT_OWNER = "(Account)"
 local ROW_MARKER    = "FIL|"     -- prefix on each saved export row, so the PowerShell exporter can find them
@@ -489,6 +493,14 @@ function FIL.OpenWindow()
         ZO_CommaDelimitNumber(rowCount), sepName))
     ShowPage()
     SCENE_MANAGER:Show(FIL.COPY_SCENE)
+end
+
+function FIL.ToggleCopy()
+    if SCENE_MANAGER:IsShowing(FIL.COPY_SCENE) then
+        SCENE_MANAGER:Hide(FIL.COPY_SCENE)
+    else
+        FIL.OpenWindow()
+    end
 end
 
 function FIL.PrevPage() if pageIndex > 1 then pageIndex = pageIndex - 1; ShowPage() end end

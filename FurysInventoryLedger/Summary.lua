@@ -420,6 +420,14 @@ function FIL.OpenSummary()
     SCENE_MANAGER:Show(FIL.SUMMARY_SCENE)
 end
 
+function FIL.ToggleSummary()
+    if SCENE_MANAGER:IsShowing(FIL.SUMMARY_SCENE) then
+        SCENE_MANAGER:Hide(FIL.SUMMARY_SCENE)
+    else
+        FIL.OpenSummary()
+    end
+end
+
 function FIL.RefreshSummary()
     Draw()
 end

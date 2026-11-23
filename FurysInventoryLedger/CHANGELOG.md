@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.3
+- New keybinds: Controls > Addon Keybinds > Fury's Inventory Ledger now has "Open/close the summary" and "Open/close the copy window". Both start unbound; pick your own keys.
+
 ## 1.2.2
 - Esc now closes the summary and copy windows. They also bring up the mouse cursor when they open, and close when you open another game menu.
 
