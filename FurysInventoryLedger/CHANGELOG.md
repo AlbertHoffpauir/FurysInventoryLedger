@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+- New look, "Fury Night", shared by all of Fury's addons: deep blue-black windows with an indigo frame, a soft glow behind the title, a violet line under it and a bag icon beside it. Titles use the game's book font (Prose Antique).
+- Summary page: blue column headers with a divider, striped rows, violet lines under each section, and gold amounts in gold with the game's coin icon.
+- Changes since yesterday and over 7 days are green when they went up and rose when they went down.
+- Chat messages and the settings title use the new violet color.
+- Nothing about what the addon does or your settings has changed.
+
 ## 1.2.3
 - New keybinds: Controls > Addon Keybinds > Fury's Inventory Ledger now has "Open/close the summary" and "Open/close the copy window". Both start unbound; pick your own keys.
 

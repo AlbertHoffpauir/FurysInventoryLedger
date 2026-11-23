@@ -4,13 +4,13 @@
             <Dimensions x="900" y="620" />
             <Anchor point="CENTER" />
             <Controls>
-                <Backdrop name="$(parent)Bg" edgeColor="FFC9A227">
+                <Backdrop name="$(parent)Bg" edgeColor="FF4A3D99">
                     <AnchorFill />
                     <Edge edgeSize="2" />
-                    <OnInitialized>self:SetCenterColor(0.05, 0.05, 0.05, 1)</OnInitialized>
+                    <OnInitialized>self:SetCenterColor(0.059, 0.055, 0.122, 1)</OnInitialized>
                 </Backdrop>
 
-                <Label name="$(parent)Title" font="ZoFontWinH2" color="C9A227" text="Fury's Inventory Ledger">
+                <Label name="$(parent)Title" font="$(ANTIQUE_FONT)|26|soft-shadow-thick" color="ECEAF8" text="Fury's Inventory Ledger">
                     <Anchor point="TOPLEFT" offsetX="20" offsetY="14" />
                 </Label>
 
@@ -28,13 +28,13 @@
                     <OnMouseExit>ClearTooltip(InformationTooltip)</OnMouseExit>
                 </Button>
 
-                <Label name="$(parent)Info" font="ZoFontGame" color="D8D0B8" wrapMode="ELLIPSIS">
+                <Label name="$(parent)Info" font="ZoFontGame" color="B4B0D8" wrapMode="ELLIPSIS">
                     <Dimensions x="860" y="24" />
-                    <Anchor point="TOPLEFT" offsetX="20" offsetY="50" />
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="56" />
                 </Label>
 
                 <Backdrop name="$(parent)EditBg" inherits="ZO_EditBackdrop">
-                    <Anchor point="TOPLEFT" offsetX="20" offsetY="80" />
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="86" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-60" />
                     <Controls>
                         <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="32000" font="ZoFontChat" />
@@ -47,7 +47,7 @@
                     <OnClicked>FurysInventoryLedger.PrevPage()</OnClicked>
                 </Button>
 
-                <Label name="$(parent)PageLabel" font="ZoFontGameBold" color="C9A227">
+                <Label name="$(parent)PageLabel" font="ZoFontGameBold" color="A08CFF">
                     <Anchor point="LEFT" relativeTo="$(parent)Prev" relativePoint="RIGHT" offsetX="16" />
                 </Label>
 

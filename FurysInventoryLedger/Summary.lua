@@ -4,9 +4,7 @@
 
 local FIL = FurysInventoryLedger
 
-local GOLD_C  = ZO_ColorDef:New("C9A227")
-local LIGHT_C = ZO_ColorDef:New("E8E0C8")
-local DIM_C   = ZO_ColorDef:New("8C8778")
+local T = FIL.Theme   -- Fury Night colors and fonts (Theme.lua)
 
 local CONTENT_WIDTH = 920
 local ROW_H         = 24
@@ -40,6 +38,18 @@ local function SinceLabel(day, exactDay, exactText)
     if not day then return exactText end
     if day == exactDay then return exactText end
     return day:sub(6)
+end
+
+-- Gold amount with the game's own coin icon.
+local function Gold(n)
+    return ZO_Currency_FormatKeyboard(CURT_MONEY, n or 0, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+end
+
+-- Color for a change: green up, rose down, muted when flat or unknown.
+local function ChangeColor(n)
+    if n and n > 0 then return T.GOOD end
+    if n and n < 0 then return T.BAD end
+    return T.MUTED
 end
 
 local function Pct(part, whole)
@@ -201,14 +211,14 @@ local function NewLabel(x, top, width, height, text, font, color, align)
     l:SetAnchor(TOPLEFT, child, TOPLEFT, x, top)
     l:SetDimensions(width, height)
     l:SetFont(font or "ZoFontGame")
-    l:SetColor((color or LIGHT_C):UnpackRGBA())
+    l:SetColor((color or T.TEXT):UnpackRGBA())
     l:SetHorizontalAlignment(align or TEXT_ALIGN_LEFT)
     l:SetText(text or "")
     l:SetHidden(false)
     return l
 end
 
-local function NewRect(x, top, width, height, r, g, b, a)
+local function NewRect(x, top, width, height, color)
     usedTextures = usedTextures + 1
     local t = textures[usedTextures]
     if not t then
@@ -219,51 +229,52 @@ local function NewRect(x, top, width, height, r, g, b, a)
     t:ClearAnchors()
     t:SetAnchor(TOPLEFT, child, TOPLEFT, x, top)
     t:SetDimensions(width, height)
-    t:SetColor(r, g, b, a)
+    t:SetColor(color:UnpackRGBA())
     t:SetHidden(false)
     return t
 end
 
 local function Section(title, note)
     y = y + 18
-    NewLabel(0, y, CONTENT_WIDTH, 30, title, "ZoFontWinH3", GOLD_C)
+    NewLabel(0, y, CONTENT_WIDTH, 30, title, T.FONT_SECTION, T.TEXT)
     if note then
-        NewLabel(0, y, CONTENT_WIDTH, 30, note, "ZoFontGameSmall", DIM_C, TEXT_ALIGN_RIGHT)
+        NewLabel(0, y, CONTENT_WIDTH, 30, note, "ZoFontGameSmall", T.MUTED, TEXT_ALIGN_RIGHT)
     end
     y = y + 30
-    NewRect(0, y, CONTENT_WIDTH, 2, 0.79, 0.64, 0.15, 0.8)
+    NewRect(0, y, CONTENT_WIDTH, 2, T.VIOLET)
     y = y + 6
 end
 
--- cols: { { title, width, align }, ... }; rows: list of { cells = {...}, dim = bool }
+-- cols: { { title, width, align }, ... }
+-- rows: list of { cells = {...}, dim = bool, colors = { [column] = color } }
 local function Table(cols, rows)
     local x = 0
     for _, c in ipairs(cols) do
-        NewLabel(x + 6, y, c[2] - 12, ROW_H, c[1], "ZoFontGameBold", DIM_C, c[3])
+        NewLabel(x + 6, y, c[2] - 12, ROW_H, c[1], T.FONT_HEADER, T.BLUE, c[3])
         x = x + c[2]
     end
     y = y + ROW_H
+    NewRect(0, y - 1, CONTENT_WIDTH, 1, T.EDGE)
     for i, row in ipairs(rows) do
-        if i % 2 == 1 then NewRect(0, y, CONTENT_WIDTH, ROW_H, 1, 1, 1, 0.05) end
+        if i % 2 == 0 then NewRect(0, y, CONTENT_WIDTH, ROW_H, T.STRIPE) end
         x = 0
         for ci, c in ipairs(cols) do
-            local color = row.dim and DIM_C or LIGHT_C
-            if row.gold and ci == 1 then color = GOLD_C end
-            NewLabel(x + 6, y, c[2] - 12, ROW_H, row.cells[ci], "ZoFontGame", color, c[3])
+            local color = row.dim and T.MUTED or (row.colors and row.colors[ci]) or T.TEXT
+            NewLabel(x + 6, y, c[2] - 12, ROW_H, row.cells[ci], T.FONT_BODY, color, c[3])
             x = x + c[2]
         end
         y = y + ROW_H
     end
 end
 
-local function Tile(index, value, caption, change)
+local function Tile(index, value, caption, change, delta, valueColor)
     local width, gap = 145, 10
     local x = (index - 1) * (width + gap)
-    NewRect(x, y, width, 86, 1, 1, 1, 0.06)
-    NewRect(x, y, width, 2, 0.79, 0.64, 0.15, 0.9)
-    NewLabel(x + 8, y + 8, width - 16, 34, value, "ZoFontWinH2", GOLD_C, TEXT_ALIGN_CENTER)
-    NewLabel(x + 8, y + 42, width - 16, 20, caption, "ZoFontGameSmall", LIGHT_C, TEXT_ALIGN_CENTER)
-    NewLabel(x + 8, y + 60, width - 16, 20, change or "", "ZoFontGameSmall", DIM_C, TEXT_ALIGN_CENTER)
+    NewRect(x, y, width, 86, T.STRIPE)
+    NewRect(x, y, width, 2, T.VIOLET)
+    NewLabel(x + 8, y + 8, width - 16, 34, value, T.FONT_NUMBER, valueColor or T.TEXT, TEXT_ALIGN_CENTER)
+    NewLabel(x + 8, y + 42, width - 16, 20, caption, "ZoFontGameSmall", T.SUB, TEXT_ALIGN_CENTER)
+    NewLabel(x + 8, y + 60, width - 16, 20, change or "", "ZoFontGameSmall", ChangeColor(delta), TEXT_ALIGN_CENTER)
 end
 
 ------------------------------------------------------------------------------
@@ -288,17 +299,21 @@ local function Draw()
     ResetCanvas()
 
     -- Tiles
+    -- Returns the "+12 since yesterday" text and the change itself (for its color).
     local function vsYesterday(now, field, curName)
         if not yesterday then return "" end
         local before = curName and yesterday.cur and yesterday.cur[curName] or (not curName and yesterday[field])
         if not before then return "" end
-        return Signed(now - before) .. " since " .. SinceLabel(yDay, Day(1), "yesterday")
+        return Signed(now - before) .. " since " .. SinceLabel(yDay, Day(1), "yesterday"), now - before
     end
-    Tile(1, Num(r.qty),    "Items",           vsYesterday(r.qty, "items"))
+    local itemsText, itemsDelta = vsYesterday(r.qty, "items")
+    local goldText,  goldDelta  = vsYesterday(r.gold, nil, r.goldName)
+    local valueText, valueDelta = vsYesterday(r.value, "value")
+    Tile(1, Num(r.qty),    "Items",           itemsText, itemsDelta)
     Tile(2, Num(r.unique), "Different items", "")
     Tile(3, Num(r.stacks), "Stacks / rows",   "")
-    Tile(4, Num(r.gold),   r.goldName,        vsYesterday(r.gold, nil, r.goldName))
-    Tile(5, Num(r.value),  "Vendor value",    vsYesterday(r.value, "value"))
+    Tile(4, Gold(r.gold),  r.goldName,        goldText, goldDelta, T.GOLD)
+    Tile(5, Num(r.value),  "Vendor value",    valueText, valueDelta)
     Tile(6, zo_strformat("<<1>>/<<2>>", #r.chars, GetNumCharacters()), "Characters", "/ledger chars")
     y = y + 86
 
@@ -311,14 +326,21 @@ local function Draw()
     for _, c in ipairs(curList) do
         local dY = yesterday and yesterday.cur and yesterday.cur[c.name]
         local dW = lastWeek and lastWeek.cur and lastWeek.cur[c.name]
-        curRows[#curRows + 1] = { gold = true, cells = {
-            c.name,
-            c.chars > 0 and Num(c.chars) or "",
-            (c.bank + c.account) > 0 and Num(c.bank + c.account) or "",
-            Num(c.total),
-            dY and Signed(c.total - dY) or "",
-            dW and Signed(c.total - dW) or "",
-        } }
+        local isGold = (c.name == r.goldName)
+        local amount = isGold and T.GOLD or T.TEXT
+        local changeY = dY and (c.total - dY)
+        local changeW = dW and (c.total - dW)
+        curRows[#curRows + 1] = {
+            cells = {
+                c.name,
+                c.chars > 0 and Num(c.chars) or "",
+                (c.bank + c.account) > 0 and Num(c.bank + c.account) or "",
+                isGold and Gold(c.total) or Num(c.total),
+                changeY and Signed(changeY) or "",
+                changeW and Signed(changeW) or "",
+            },
+            colors = { [2] = amount, [3] = amount, [4] = amount, [5] = ChangeColor(changeY), [6] = ChangeColor(changeW) },
+        }
     end
     local note = (yDay or wDay) and "Change = now minus your saved total from that day"
         or "Change columns fill in from tomorrow"
@@ -384,7 +406,10 @@ local function Draw()
     table.sort(r.chars, function(a, b) return a.name < b.name end)
     local charRows = {}
     for _, c in ipairs(r.chars) do
-        charRows[#charRows + 1] = { cells = { c.name, Num(c.carried), Num(c.equipped), Num(c.gold), FIL.FormatTime(c.updated) } }
+        charRows[#charRows + 1] = {
+            cells  = { c.name, Num(c.carried), Num(c.equipped), Gold(c.gold), FIL.FormatTime(c.updated) },
+            colors = { [4] = T.GOLD, [5] = T.SUB },
+        }
     end
     local seen = {}
     for _, c in ipairs(r.chars) do seen[c.id] = true end
@@ -403,9 +428,9 @@ local function Draw()
     y = y + 20
     NewLabel(0, y, CONTENT_WIDTH, 20,
         "Other characters show what they held at their last logout. Coffers and the Furniture Vault update when opened.",
-        "ZoFontGameSmall", DIM_C)
+        "ZoFontGameSmall", T.MUTED)
     y = y + 24
-    NewRect(0, y, CONTENT_WIDTH, 1, 0, 0, 0, 0)   -- sets the scroll extent
+    NewRect(0, y, CONTENT_WIDTH, 1, ZO_ColorDef:New(0, 0, 0, 0))   -- sets the scroll extent
 end
 
 ------------------------------------------------------------------------------

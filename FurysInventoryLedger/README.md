@@ -44,6 +44,8 @@ you open the summary). They fill in from your second day with the addon. If ther
 exactly yesterday or 7 days ago, the column heading shows the date it compares to instead. Saved totals are
 kept for 120 days.
 
+Changes are shown in green when they went up and in rose when they went down. Gold amounts show in gold with the game's coin icon.
+
 ## Getting it into Excel
 
 **Full file (Windows):**

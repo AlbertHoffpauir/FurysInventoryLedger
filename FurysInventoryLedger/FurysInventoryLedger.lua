@@ -7,7 +7,7 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.2.3"
+FIL.version = "1.3.0"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
 FIL.SUMMARY_SCENE = "FurysInventoryLedgerSummary"
 
@@ -21,9 +21,9 @@ local PAGE_CHARS    = 28000      -- in-game copy window page size (the edit box 
 local SCAN_DELAY_MS = 1500       -- debounce for rescans after inventory changes
 local HOUSE_DELAY_MS = 4000      -- give placed furniture time to load after zoning into a house
 
-local GOLD = "|cC9A227"
+local TAG = "|cA08CFF"   -- Fury Night violet (Theme.lua)
 local function Msg(text, ...)
-    d(GOLD .. "[Ledger]|r " .. zo_strformat(text, ...))
+    d(TAG .. "[Ledger]|r " .. zo_strformat(text, ...))
 end
 
 local SV         -- whole saved-variable table
@@ -534,7 +534,7 @@ local function BuildSettings()
     settingsPanel = LAM:RegisterAddonPanel("FurysInventoryLedgerSettings", {
         type = "panel",
         name = FIL.title,
-        displayName = GOLD .. FIL.title .. "|r",
+        displayName = TAG .. FIL.title .. "|r",
         author = "Furyous",
         version = FIL.version,
         slashCommand = "/ledgersettings",
@@ -701,6 +701,8 @@ local function OnLoaded(_, addonName)
 
     FIL.CreateScene(FIL.COPY_SCENE, FurysInventoryLedgerWindow)
     FIL.CreateScene(FIL.SUMMARY_SCENE, FurysInventoryLedgerSummary)
+    FIL.Theme.Window(FurysInventoryLedgerWindow)
+    FIL.Theme.Window(FurysInventoryLedgerSummary)
 
     SLASH_COMMANDS["/ledger"] = Slash
     BuildSettings()
