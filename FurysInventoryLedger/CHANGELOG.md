@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.0
+- New button in Settings > Addons > Fury's Inventory Ledger: "Get the Windows tools" opens the download page for the Excel export in your browser (the game asks first). /ledger tools does the same.
+
 ## 1.3.0
 - New look, "Fury Night", shared by all of Fury's addons: deep blue-black windows with an indigo frame, a soft glow behind the title, a violet line under it and a bag icon beside it. Titles use the game's book font (Prose Antique).
 - Summary page: blue column headers with a divider, striped rows, violet lines under each section, and gold amounts in gold with the game's coin icon.

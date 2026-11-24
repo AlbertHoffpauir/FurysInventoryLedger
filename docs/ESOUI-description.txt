@@ -76,7 +76,7 @@ The change columns compare against a total saved once a day (at logout, reload, 
 [COLOR="#B4B0D8"][I]Windows, separate download. The addon works fully in game without it.[/I][/COLOR]
 [LIST=1]
 [*]Log out, or type [FONT="Courier New"][B]/reloadui[/B][/FONT]. The game only writes its saved data at those moments.
-[*]Download the [B][URL="https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-WindowsTools-1.2.0.zip"]Windows tools zip[/URL][/B] and unzip it anywhere, for example Documents\Elder Scrolls Online. It is a separate download because ESOUI addon zips may only hold addon files.
+[*]Download the [B][URL="https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-WindowsTools-1.2.0.zip"]Windows tools zip[/URL][/B] and unzip it anywhere, for example Documents\Elder Scrolls Online. It is a separate download because ESOUI addon zips may only hold addon files. In game, the [B]Get the Windows tools[/B] button under [FONT="Courier New"][B]/ledger settings[/B][/FONT] (or [FONT="Courier New"][B]/ledger tools[/B][/FONT]) opens the download page in your browser.
 [*]Double-click [B]ExportToExcel.cmd[/B]. It writes [B]ESO Inventory <date time>.csv[/B] to your Desktop and opens it.
 [/LIST]
 Tip: right-click [B]ExportToExcel.cmd[/B] > Send to > Desktop (create shortcut) to run it from your desktop.
@@ -98,6 +98,7 @@ Account, Character, Location, Container, Item, Qty, Quality, Item Type, Sub Type
 [*][FONT="Courier New"][B]/ledger forget <name>[/B][/FONT] remove a deleted character
 [*][FONT="Courier New"][B]/ledger sep tab[/B][/FONT] | [FONT="Courier New"][B]comma[/B][/FONT] separator for the copy window
 [*][FONT="Courier New"][B]/ledger settings[/B][/FONT] the settings page
+[*][FONT="Courier New"][B]/ledger tools[/B][/FONT] opens the Windows tools download page in your browser
 [/LIST]
 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]Questions[/B][/COLOR][/FONT][/SIZE]

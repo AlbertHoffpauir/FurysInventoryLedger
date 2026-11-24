@@ -50,7 +50,7 @@ Changes are shown in green when they went up and in rose when they went down. Go
 
 **Full file (Windows):**
 1. Log out, or type `/reloadui`. The game only writes saved data at those moments.
-2. Download the separate **Windows tools** zip (link on the addon's ESOUI page) and unzip it anywhere,
+2. Download the separate **Windows tools** zip (in game: **Get the Windows tools** under `/ledger settings`, or `/ledger tools`; the game asks before it opens your browser. The link is also on the addon's ESOUI page) and unzip it anywhere,
    for example `Documents\Elder Scrolls Online`. It is not part of the addon download, because ESOUI addon
    zips may only hold addon files.
 3. Double-click `ExportToExcel.cmd`. It writes `ESO Inventory <date time>.csv` to your Desktop and opens it.
@@ -84,6 +84,7 @@ or `/ledgersettings`: open the summary, copy window separator (tab or comma), op
 - `/ledger forget <name>` remove a deleted character
 - `/ledger sep tab` | `comma` separator for the copy window
 - `/ledger settings` the settings page
+- `/ledger tools` opens the Windows tools download page (Excel export) in your browser
 
 **Keybinds:** Controls > Addon Keybinds > Fury's Inventory Ledger has "Open/close the summary" and
 "Open/close the copy window". Both start unbound; pick your own keys.

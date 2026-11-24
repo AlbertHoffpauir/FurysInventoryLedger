@@ -7,7 +7,9 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.3.0"
+FIL.version = "1.4.0"
+-- The Windows tools (Excel export) can't ship in the ESOUI zip; this page has the download.
+FIL.toolsUrl = "https://github.com/AlbertHoffpauir/FurysInventoryLedger#downloads"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
 FIL.SUMMARY_SCENE = "FurysInventoryLedgerSummary"
 
@@ -565,7 +567,11 @@ local function BuildSettings()
 
         { type = "header", name = "Export to Excel (Windows)" },
         { type = "description",
-          text = "Type /reloadui (or log out), then run ExportToExcel.cmd from the separate Windows tools download (link on the addon's ESOUI page) for a full spreadsheet file." },
+          text = "Type /reloadui (or log out), then run ExportToExcel.cmd from the Windows tools for a full spreadsheet file. " ..
+                 "The tools run outside the game, so ESOUI's rules keep them out of the addon download: they're a separate free zip. Unzip it into any folder." },
+        { type = "button", name = "Get the Windows tools",
+          tooltip = "Opens the download page on GitHub in your browser. The game asks before it opens.",
+          func = function() RequestOpenUnsafeURL(FIL.toolsUrl) end },
     })
 end
 
@@ -624,6 +630,8 @@ local function Slash(args)
         if ok then Msg("Counted <<1>> placed furniture in <<2>>.", count, house) end
     elseif cmd == "settings" then
         FIL.OpenSettings()
+    elseif cmd == "tools" then
+        RequestOpenUnsafeURL(FIL.toolsUrl)
     elseif cmd == "chars" then
         ListCharacters()
     elseif cmd == "forget" then
@@ -644,7 +652,8 @@ local function Slash(args)
         d("  /ledger forget <name> - drop a deleted character")
         d("  /ledger sep tab|comma - separator for the copy window")
         d("  /ledger settings - open the settings (or the gear on either window)")
-        d("  For a full spreadsheet file, /reloadui then run ExportToExcel.cmd from the Windows tools download (see the addon page).")
+        d("  /ledger tools - get the Windows tools (Excel export) from GitHub")
+        d("  For a full spreadsheet file, /reloadui then run ExportToExcel.cmd from the Windows tools.")
     end
 end
 
