@@ -106,7 +106,7 @@ function FIL.SummaryAggregate()
     end
 
     local function addContainer(cont, charEntry)
-        for _, it in ipairs(cont.items) do
+        for _, it in ipairs(FIL.Items(cont)) do
             if it.cur then
                 local where = "chars"
                 if cont.owner == OWN then where = (cont.location == "Bank") and "bank" or "account" end
@@ -292,9 +292,27 @@ local function Draw()
     local yesterday, yDay = Baseline(history, Day(1))
     local lastWeek, wDay  = Baseline(history, Day(7))
 
+    -- Characters on this account right now, to tell scanned, missing and deleted ones apart.
+    local onAccount, numOnAccount = {}, GetNumCharacters()
+    for i = 1, numOnAccount do
+        local name, _, _, _, _, _, id = GetCharacterInfo(i)
+        onAccount[id] = zo_strformat("<<1>>", name)
+    end
+    local scanned, seen = 0, {}
+    for _, c in ipairs(r.chars) do
+        seen[c.id] = true
+        c.gone = (onAccount[c.id] == nil)
+        if not c.gone then scanned = scanned + 1 end
+    end
+    local missingChars = {}
+    for i = 1, numOnAccount do
+        local _, _, _, _, _, _, id = GetCharacterInfo(i)
+        if not seen[id] then missingChars[#missingChars + 1] = onAccount[id] end
+    end
+
     local win = FurysInventoryLedgerSummary
-    win:GetNamedChild("Sub"):SetText(zo_strformat("<<1>>  -  <<2>> of <<3>> characters scanned",
-        FIL.accountKey, #r.chars, GetNumCharacters()))
+    win:GetNamedChild("Sub"):SetText(zo_strformat("<<1>>  -  <<2>> of <<3>> characters read",
+        FIL.accountKey, scanned, numOnAccount))
 
     ResetCanvas()
 
@@ -311,11 +329,46 @@ local function Draw()
     local valueText, valueDelta = vsYesterday(r.value, "value")
     Tile(1, Num(r.qty),    "Items",           itemsText, itemsDelta)
     Tile(2, Num(r.unique), "Different items", "")
-    Tile(3, Num(r.stacks), "Stacks / rows",   "")
+    Tile(3, Num(r.stacks), "Stacks",          "")
     Tile(4, Gold(r.gold),  r.goldName,        goldText, goldDelta, T.GOLD)
     Tile(5, Num(r.value),  "Vendor value",    valueText, valueDelta)
-    Tile(6, zo_strformat("<<1>>/<<2>>", #r.chars, GetNumCharacters()), "Characters", "/ledger chars")
+    Tile(6, zo_strformat("<<1>>/<<2>>", scanned, numOnAccount), "Characters read",
+        (scanned < numOnAccount) and "log in on the rest" or "all read")
     y = y + 86
+
+    -- Still to read: only drawn while something is missing, so a new player sees what to do next.
+    local todo = {}
+    if #missingChars > 0 then
+        todo[#todo + 1] = { cells = { zo_strformat("<<1>> characters", #missingChars),
+            "Log in once on each: " .. table.concat(missingChars, ", ") } }
+    end
+    local coffers = {}
+    for _, bag in ipairs(FIL.HouseBankBags()) do
+        local collectibleId = GetCollectibleForBag(bag)
+        if not acct.shared["housebank_" .. bag] and collectibleId ~= 0 and IsCollectibleUnlocked(collectibleId) then
+            coffers[#coffers + 1] = FIL.CollectibleLabel(collectibleId)
+        end
+    end
+    if #coffers > 0 then
+        todo[#todo + 1] = { cells = { zo_strformat("<<1>> storage coffers", #coffers),
+            "Open each one once in your house: " .. table.concat(coffers, ", ") } }
+    end
+    if not acct.shared.vault and GetBagSize(BAG_FURNITURE_VAULT) > 0 then
+        todo[#todo + 1] = { cells = { "Furniture Vault", "Open it once in any house you own." } }
+    end
+    local housesRead = 0
+    for key in pairs(acct.shared) do
+        if key:sub(1, 6) == "house_" then housesRead = housesRead + 1 end
+    end
+    local housesOwned = GetTotalUnlockedCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_HOUSE)
+    if housesRead < housesOwned then
+        todo[#todo + 1] = { cells = { "Placed furniture",
+            zo_strformat("<<1>> of your <<2>> houses read. Visit the others once to count their furniture.", housesRead, housesOwned) } }
+    end
+    if #todo > 0 then
+        Section("Still to read", "This list gets shorter as you go")
+        Table({ { "What", 220, LEFT }, { "How to add it", 700, LEFT } }, todo)
+    end
 
     -- Currencies
     local curRows = {}
@@ -406,28 +459,29 @@ local function Draw()
     table.sort(r.chars, function(a, b) return a.name < b.name end)
     local charRows = {}
     for _, c in ipairs(r.chars) do
-        charRows[#charRows + 1] = {
-            cells  = { c.name, Num(c.carried), Num(c.equipped), Gold(c.gold), FIL.FormatTime(c.updated) },
-            colors = { [4] = T.GOLD, [5] = T.SUB },
-        }
-    end
-    local seen = {}
-    for _, c in ipairs(r.chars) do seen[c.id] = true end
-    for i = 1, GetNumCharacters() do
-        local name, _, _, _, _, _, id = GetCharacterInfo(i)
-        if not seen[id] then
-            charRows[#charRows + 1] = { dim = true, cells = { zo_strformat("<<1>>", name), "", "", "", "Not scanned yet - log in once" } }
+        if c.gone then
+            -- Still counted in the totals until the player drops it.
+            charRows[#charRows + 1] = { dim = true,
+                cells = { c.name, Num(c.carried), Num(c.equipped), Gold(c.gold), "Deleted? /ledger forget " .. c.name } }
+        else
+            charRows[#charRows + 1] = {
+                cells  = { c.name, Num(c.carried), Num(c.equipped), Gold(c.gold), FIL.FormatTime(c.updated) },
+                colors = { [4] = T.GOLD, [5] = T.SUB },
+            }
         end
+    end
+    for _, name in ipairs(missingChars) do
+        charRows[#charRows + 1] = { dim = true, cells = { name, "", "", "", "Not read yet - log in once" } }
     end
     Section("Characters")
     Table({
-        { "Character", 300, LEFT }, { "Carried", 140, RIGHT }, { "Equipped", 140, RIGHT },
-        { r.goldName, 150, RIGHT }, { "Last scanned", 190, RIGHT },
+        { "Character", 260, LEFT }, { "Carried", 120, RIGHT }, { "Equipped", 120, RIGHT },
+        { r.goldName, 150, RIGHT }, { "Last read", 270, RIGHT },
     }, charRows)
 
     y = y + 20
     NewLabel(0, y, CONTENT_WIDTH, 20,
-        "Other characters show what they held at their last logout. Coffers and the Furniture Vault update when opened.",
+        "Other characters show what they held at their last logout. Coffers and the Furniture Vault update when opened, placed furniture when you visit the house.",
         "ZoFontGameSmall", T.MUTED)
     y = y + 24
     NewRect(0, y, CONTENT_WIDTH, 1, ZO_ColorDef:New(0, 0, 0, 0))   -- sets the scroll extent

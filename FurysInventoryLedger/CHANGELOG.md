@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.5.2
+- The version number now shows beside the title of the summary and copy windows.
+
+## 1.5.1
+- Smaller saved file: each item is now saved as one line of text instead of a small table, which cuts the item part of the file by more than half. Your existing data is converted the first time you log in, and every line is checked as it is converted. Nothing you see in game or in Excel changes.
+- If you go back to an older version after this one, characters and storage you have not visited since show as empty until you log in on them or open them again.
+
+## 1.5.0
+A polish pass for new players, plus less work and a smaller saved file.
+- Summary page: new "Still to read" section lists what the addon has not seen yet and how to add it: characters to log in on, storage coffers and the Furniture Vault to open, houses to visit. It disappears when nothing is left.
+- Summary page: a character that is no longer on your account is marked "Deleted?" with the command that removes it, and no longer counts toward "characters read".
+- Every button now has a hover tip, in both windows and on the settings page.
+- New "Prepare the Excel file" button in the settings (also /ledger export): builds the full list for the Windows tools, then asks before it reloads the interface.
+- New setting "Keep the Excel file ready". On: the full list is saved every time you log out, reload or change zone, as before. Off: it is only saved when you click Prepare the Excel file, which cuts the addon's saved file about in half. It starts turned off on new installs; if you already used the addon it stays on, so nothing changes for you unless you switch it off.
+- Faster zone changes: the bank and craft bag are read once at login instead of on every loading screen, and the saved list and daily totals are only rebuilt when something you own changed.
+- The copy window says how many pages there are and what to do with them.
+- Windows tools 1.5.0: the Excel export tells you what to click in game when there is no list yet, shows when the list was prepared, and reads the saved file whichever way the game laid it out.
+
 ## 1.4.0
 - New button in Settings > Addons > Fury's Inventory Ledger: "Get the Windows tools" opens the download page for the Excel export in your browser (the game asks first). /ledger tools does the same.
 

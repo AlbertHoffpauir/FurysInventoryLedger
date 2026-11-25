@@ -42,12 +42,16 @@
                     <Dimensions x="140" y="30" />
                     <Anchor point="BOTTOMLEFT" offsetX="20" offsetY="-16" />
                     <OnClicked>FurysInventoryLedger.RefreshSummary()</OnClicked>
+                    <OnMouseEnter>InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -4); SetTooltipText(InformationTooltip, "Redraws the page with the latest numbers.")</OnMouseEnter>
+                    <OnMouseExit>ClearTooltip(InformationTooltip)</OnMouseExit>
                 </Button>
 
                 <Button name="$(parent)Copy" inherits="ZO_DefaultButton" text="Copy for Excel">
                     <Dimensions x="200" y="30" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-16" />
                     <OnClicked>FurysInventoryLedger.SummaryToCopy()</OnClicked>
+                    <OnMouseEnter>InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -4); SetTooltipText(InformationTooltip, "Opens the whole list as text you can copy and paste into Excel (also /ledger copy).")</OnMouseEnter>
+                    <OnMouseExit>ClearTooltip(InformationTooltip)</OnMouseExit>
                 </Button>
             </Controls>
         </TopLevelControl>

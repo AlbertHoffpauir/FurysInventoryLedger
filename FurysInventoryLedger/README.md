@@ -24,7 +24,9 @@ Identical stacks in the same place are added together. Stolen copies get their o
 - At login, and a moment after anything in your bags, bank or craft bag changes.
 - House storage and the Furniture Vault: when you open and close them. Open each one once after installing.
 - Placed furniture: when you enter a house you own, and after you place or remove furniture there.
-- Other characters only update when you log in on them. `/ledger chars` lists the ones still missing.
+- Other characters only update when you log in on them.
+- The summary page has a **Still to read** section that lists what is missing (characters, coffers, the
+  Furniture Vault, houses) and how to add it. It disappears when nothing is left.
 
 ## Summary page (`/ledger`)
 
@@ -36,8 +38,8 @@ Identical stacks in the same place are added together. Stolen copies get their o
   craft bag, house storage, Furniture Vault, placed furniture).
 - **By item type** and **by quality:** how many of each you own.
 - **Most owned:** your top 25 items by count, and where you keep them.
-- **Characters:** items carried and equipped, gold, and when each was last scanned. Characters not scanned
-  yet are listed too.
+- **Characters:** items carried and equipped, gold, and when each was last read. Characters not read
+  yet are listed too, and a deleted character is marked with the command that removes it.
 
 The change columns compare against a total the addon saves once a day (at logout, reload, zoning and when
 you open the summary). They fill in from your second day with the addon. If there is no saved total from
@@ -49,11 +51,17 @@ Changes are shown in green when they went up and in rose when they went down. Go
 ## Getting it into Excel
 
 **Full file (Windows):**
-1. Log out, or type `/reloadui`. The game only writes saved data at those moments.
+1. In game, click **Prepare the Excel file** under `/ledger settings` (or type `/ledger export`). It builds
+   the full list and asks before it reloads the interface, because the game only writes saved data when it
+   reloads or you log out.
 2. Download the separate **Windows tools** zip (in game: **Get the Windows tools** under `/ledger settings`, or `/ledger tools`; the game asks before it opens your browser. The link is also on the addon's ESOUI page) and unzip it anywhere,
    for example `Documents\Elder Scrolls Online`. It is not part of the addon download, because ESOUI addon
    zips may only hold addon files.
 3. Double-click `ExportToExcel.cmd`. It writes `ESO Inventory <date time>.csv` to your Desktop and opens it.
+
+**Keep the Excel file ready** (a setting, starts turned off): when on, the full list is saved every time you
+log out, reload or change zone, so step 1 is not needed. It about doubles the size of the addon's saved file.
+If you used the addon before 1.5.0 it is on for you, as before.
 
 **In game:** `/ledger copy` (or **Copy for Excel** on the summary) opens the copy window. Click **Select All**, press Ctrl+C, paste into Excel.
 Large lists are split into pages; paste each page under the last. The copy window leaves out the Item Link
@@ -73,12 +81,14 @@ Scanned, Item Link.
 ## Settings
 
 The gear on the summary or the copy window, Settings > Addons > Fury's Inventory Ledger, `/ledger settings`
-or `/ledgersettings`: open the summary, copy window separator (tab or comma), open the copy window, rescan now.
+or `/ledgersettings`: open the summary, copy window separator (tab or comma), open the copy window, rescan now,
+Prepare the Excel file, Keep the Excel file ready, Get the Windows tools.
 
 ## Commands
 
 - `/ledger` open the summary
 - `/ledger copy` open the copy window
+- `/ledger export` prepare the full Excel file for the Windows tools (asks before it reloads)
 - `/ledger scan` read everything that can be read right now
 - `/ledger chars` characters scanned so far, and the ones still missing
 - `/ledger forget <name>` remove a deleted character

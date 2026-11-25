@@ -31,7 +31,7 @@ ESO gives you no list of what you own. Here, the [B]copy window[/B] puts every i
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]Getting started[/B][/COLOR][/FONT][/SIZE]
 [LIST=1]
 [*]Install [B]LibAddonMenu-2.0[/B] (see Requires above).
-[*]Log in on each character once. Open each house coffer and the Furniture Vault once, and visit the houses you own.
+[*]Log in on each character once. Open each house coffer and the Furniture Vault once, and visit the houses you own. The summary page lists what is [B]Still to read[/B], so you do not have to remember.
 [*]Type [FONT="Courier New"][B]/ledger[/B][/FONT] for the summary, or bind a key under Controls > Addon Keybinds > Fury's Inventory Ledger.
 [/LIST]
 
@@ -49,18 +49,19 @@ ESO gives you no list of what you own. Here, the [B]copy window[/B] puts every i
 [*]At login, and a moment after anything in your bags, bank or craft bag changes.
 [*]House storage and the Furniture Vault: when you open and close them. Open each one once after installing.
 [*]Placed furniture: when you enter a house you own, and after you place or remove furniture there.
-[*]Other characters only update when you log in on them. [FONT="Courier New"][B]/ledger chars[/B][/FONT] lists the ones still missing.
+[*]Other characters only update when you log in on them.
+[*]The summary page has a [B]Still to read[/B] section that lists what is missing (characters, coffers, the Furniture Vault, houses) and how to add it. It disappears when nothing is left.
 [/LIST]
 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]Summary page[/B][/COLOR][/FONT][/SIZE]
 [COLOR="#B4B0D8"][I][FONT="Courier New"][B]/ledger[/B][/FONT][/I][/COLOR]
 [LIST]
-[*][B]Tiles:[/B] total items, different items, stacks, gold, vendor value and characters scanned, with the change since yesterday.
+[*][B]Tiles:[/B] total items, different items, stacks, gold, vendor value and characters read, with the change since yesterday.
 [*][B]Currencies:[/B] every currency on characters and in the bank (account-wide ones count as bank), with the total and how much it changed since yesterday and over the last 7 days. Currencies update the moment they change.
 [*][B]Where it is:[/B] items, stacks, vendor value and share for each place: characters, companions, bank, craft bag, house storage, Furniture Vault and placed furniture.
 [*][B]By item type[/B] and [B]by quality:[/B] how many of each you own.
 [*][B]Most owned:[/B] your top 25 items by count, and where you keep them.
-[*][B]Characters:[/B] items carried and equipped, gold, and when each was last scanned. Characters not scanned yet are listed too.
+[*][B]Characters:[/B] items carried and equipped, gold, and when each was last read. Characters not read yet are listed too, and a deleted character is marked with the command that removes it.
 [/LIST]
 The change columns compare against a total saved once a day (at logout, reload, zoning and when you open the summary), so they fill in from your second day. If there is no total from exactly yesterday or 7 days ago, the heading shows the date it compares to instead. Totals are kept for 120 days. Rises show in green, drops in rose, and gold in gold with the game's coin icon.
 
@@ -75,12 +76,14 @@ The change columns compare against a total saved once a day (at logout, reload, 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]Export to Excel[/B][/COLOR][/FONT][/SIZE]
 [COLOR="#B4B0D8"][I]Windows, separate download. The addon works fully in game without it.[/I][/COLOR]
 [LIST=1]
-[*]Log out, or type [FONT="Courier New"][B]/reloadui[/B][/FONT]. The game only writes its saved data at those moments.
-[*]Download the [B][URL="https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-WindowsTools-1.2.0.zip"]Windows tools zip[/URL][/B] and unzip it anywhere, for example Documents\Elder Scrolls Online. It is a separate download because ESOUI addon zips may only hold addon files. In game, the [B]Get the Windows tools[/B] button under [FONT="Courier New"][B]/ledger settings[/B][/FONT] (or [FONT="Courier New"][B]/ledger tools[/B][/FONT]) opens the download page in your browser.
+[*]In game, click [B]Prepare the Excel file[/B] under [FONT="Courier New"][B]/ledger settings[/B][/FONT] (or type [FONT="Courier New"][B]/ledger export[/B][/FONT]). It builds the full list and asks before it reloads the interface, because the game only writes its saved data when it reloads or you log out.
+[*]Download the [B][URL="https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-WindowsTools-1.5.0.zip"]Windows tools zip[/URL][/B] and unzip it anywhere, for example Documents\Elder Scrolls Online. It is a separate download because ESOUI addon zips may only hold addon files. In game, the [B]Get the Windows tools[/B] button under [FONT="Courier New"][B]/ledger settings[/B][/FONT] (or [FONT="Courier New"][B]/ledger tools[/B][/FONT]) opens the download page in your browser.
 [*]Double-click [B]ExportToExcel.cmd[/B]. It writes [B]ESO Inventory <date time>.csv[/B] to your Desktop and opens it.
 [/LIST]
+[B]Keep the Excel file ready[/B] is a setting that starts turned off. When it is on, the full list is saved every time you log out, reload or change zone, so step 1 is not needed; it about doubles the size of the addon's saved file. If you used the addon before 1.5.0 it is on for you, as before.
 Tip: right-click [B]ExportToExcel.cmd[/B] > Send to > Desktop (create shortcut) to run it from your desktop.
-[SPOILER="What the script does"]
+[B]What the script does[/B]
+[SPOILER]
 The .cmd and .ps1 files in the Windows tools zip are plain-text scripts (batch and PowerShell) you can open in Notepad and read. They only read the addon's own saved data file on your PC and write the CSV. They never connect to the internet and never touch the game's files. Nothing runs unless you start it. Source: [URL="https://github.com/AlbertHoffpauir/FurysInventoryLedger"]GitHub[/URL].
 [/SPOILER]
 
@@ -88,11 +91,12 @@ The .cmd and .ps1 files in the Windows tools zip are plain-text scripts (batch a
 Account, Character, Location, Container, Item, Qty, Quality, Item Type, Sub Type, Equip Slot, Armor/Weapon, Trait, Set, Style, Level, CP, Bound, Stolen, Crafted, Vendor Value (each), Vendor Value (total), Item ID, Scanned, Item Link.
 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]Settings, commands and keys[/B][/COLOR][/FONT][/SIZE]
-[B]Settings:[/B] the gear on the summary or the copy window, Settings > Addons > Fury's Inventory Ledger, or [FONT="Courier New"][B]/ledger settings[/B][/FONT]. Open the summary, pick the copy window separator (tab or comma), open the copy window, or rescan now.
+[B]Settings:[/B] the gear on the summary or the copy window, Settings > Addons > Fury's Inventory Ledger, or [FONT="Courier New"][B]/ledger settings[/B][/FONT]. Open the summary, pick the copy window separator (tab or comma), open the copy window, rescan now, prepare the Excel file, or keep the Excel file ready.
 [B]Keys:[/B] Controls > Addon Keybinds > Fury's Inventory Ledger has "Open/close the summary" and "Open/close the copy window". Both start unbound.
 [LIST]
 [*][FONT="Courier New"][B]/ledger[/B][/FONT] open the summary
 [*][FONT="Courier New"][B]/ledger copy[/B][/FONT] open the copy window
+[*][FONT="Courier New"][B]/ledger export[/B][/FONT] prepare the full Excel file for the Windows tools (asks before it reloads)
 [*][FONT="Courier New"][B]/ledger scan[/B][/FONT] read everything that can be read right now
 [*][FONT="Courier New"][B]/ledger chars[/B][/FONT] characters scanned so far, and the ones still missing
 [*][FONT="Courier New"][B]/ledger forget <name>[/B][/FONT] remove a deleted character

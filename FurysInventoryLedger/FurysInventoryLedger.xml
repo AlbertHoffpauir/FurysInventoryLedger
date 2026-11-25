@@ -45,6 +45,8 @@
                     <Dimensions x="120" y="30" />
                     <Anchor point="BOTTOMLEFT" offsetX="20" offsetY="-16" />
                     <OnClicked>FurysInventoryLedger.PrevPage()</OnClicked>
+                    <OnMouseEnter>InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -4); SetTooltipText(InformationTooltip, "Previous page of the list.")</OnMouseEnter>
+                    <OnMouseExit>ClearTooltip(InformationTooltip)</OnMouseExit>
                 </Button>
 
                 <Label name="$(parent)PageLabel" font="ZoFontGameBold" color="A08CFF">
@@ -55,19 +57,25 @@
                     <Dimensions x="120" y="30" />
                     <Anchor point="LEFT" relativeTo="$(parent)PageLabel" relativePoint="RIGHT" offsetX="16" />
                     <OnClicked>FurysInventoryLedger.NextPage()</OnClicked>
-                </Button>
-
-                <Button name="$(parent)Summary" inherits="ZO_DefaultButton" text="Summary">
-                    <Dimensions x="140" y="30" />
-                    <Anchor point="RIGHT" relativeTo="$(parent)SelectAll" relativePoint="LEFT" offsetX="-12" />
-                    <OnClicked>FurysInventoryLedger.OpenSummary()</OnClicked>
+                    <OnMouseEnter>InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -4); SetTooltipText(InformationTooltip, "Next page of the list. Paste each page under the last one in Excel.")</OnMouseEnter>
+                    <OnMouseExit>ClearTooltip(InformationTooltip)</OnMouseExit>
                 </Button>
 
                 <Button name="$(parent)SelectAll" inherits="ZO_DefaultButton" text="Select All">
                     <Dimensions x="160" y="30" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-16" />
                     <OnClicked>FurysInventoryLedger.SelectAll()</OnClicked>
+                    <OnMouseEnter>InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -4); SetTooltipText(InformationTooltip, "Selects all the text on this page. Then press Ctrl+C to copy it.")</OnMouseEnter>
+                    <OnMouseExit>ClearTooltip(InformationTooltip)</OnMouseExit>
                 </Button>
+                <Button name="$(parent)Summary" inherits="ZO_DefaultButton" text="Summary">
+                    <Dimensions x="140" y="30" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)SelectAll" relativePoint="LEFT" offsetX="-12" />
+                    <OnClicked>FurysInventoryLedger.OpenSummary()</OnClicked>
+                    <OnMouseEnter>InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -4); SetTooltipText(InformationTooltip, "Back to the summary page (also /ledger).")</OnMouseEnter>
+                    <OnMouseExit>ClearTooltip(InformationTooltip)</OnMouseExit>
+                </Button>
+
             </Controls>
         </TopLevelControl>
     </Controls>

@@ -1,4 +1,4 @@
-Fury's Inventory Ledger - Windows Tools
+Fury's Inventory Ledger - Windows Tools 1.5.0
 ========================================
 
 Optional helper for the ESO addon Fury's Inventory Ledger. It runs outside the game, on Windows,
@@ -12,7 +12,9 @@ admin rights, or changes the game or the addon.
 
 Export to Excel
 ---------------
-1. Log out, or type /reloadui in game. The game only writes its saved data at those moments.
+1. In game: Settings > Addons > Fury's Inventory Ledger > Prepare the Excel file (or type /ledger export),
+   and let it reload the interface. The game only writes its saved data when it reloads or you log out.
+   If "Keep the Excel file ready" is switched on in the same settings, logging out or /reloadui is enough.
 2. Double-click ExportToExcel.cmd.
 
 ExportToExcel.cmd   Runs ExportToExcel.ps1.
