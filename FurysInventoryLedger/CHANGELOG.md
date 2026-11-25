@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.2
+- **One look across all of Fury's addons.** Every window now has the same header as the Guild Toolset: the name with its version, a **Start here** button right after it, the settings gear and the close button at the right, and a hover tip on each.
+- **New: Start here page** (the button on the summary, or `/ledger start`): what it lists, when it reads, the summary and Excel in one page.
+- A one-line welcome in chat on a new install.
+- Chat lines start with [Inventory Ledger] and are proper chat lines; `/ledger help` lists the commands one per line.
+- The summary's title is just the addon's name and version; the copy window is called "Copy for Excel". Close buttons have a hover tip.
+- The export pop-up's second button is Cancel, like every other pop-up. The settings page links to the addon's ESOUI page.
+
 ## 1.6.1
 - Find results now show the total item count beside the number of matches, on the summary and in chat.
 - Summary page: a cell that is cut short shows its full text when you hover it.

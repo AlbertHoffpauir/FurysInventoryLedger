@@ -7,7 +7,7 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.6.1"
+FIL.version = "1.6.2"
 -- The Windows tools (Excel export) can't ship in the ESOUI zip; this page has the download.
 FIL.toolsUrl = "https://github.com/AlbertHoffpauir/FurysInventoryLedger#downloads"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
@@ -25,7 +25,11 @@ local HOUSE_DELAY_MS = 4000      -- give placed furniture time to load after zon
 
 local TAG = "|cA08CFF"   -- Fury Night violet (Theme.lua)
 local function Msg(text, ...)
-    d(TAG .. "[Ledger]|r " .. zo_strformat(text, ...))
+    CHAT_ROUTER:AddSystemMessage(TAG .. "[Inventory Ledger]|r " .. zo_strformat(text, ...))
+end
+-- A line of chat help: no zo_strformat, so "<words>" and "|" style text shows as typed.
+local function Help(text)
+    CHAT_ROUTER:AddSystemMessage(TAG .. "[Inventory Ledger]|r " .. text)
 end
 
 local SV         -- whole saved-variable table
@@ -385,6 +389,11 @@ local function OnPlayerActivated()
     if firstActivation then
         firstActivation = false
         ScanEverythingReadable()
+        -- 1.6.2: one line on a new install, like every Fury addon.
+        if FIL.newInstall and not SV.welcomeShown then
+            SV.welcomeShown = true
+            Msg("Welcome! Type /ledger for the summary of everything you own; its Start here button explains it in one page. Everything starts turned off.")
+        end
     end
     if GetCurrentZoneHouseId() ~= 0 and IsOwnerOfCurrentHouse() then
         Queue("house", HOUSE_DELAY_MS)
@@ -540,7 +549,7 @@ ZO_Dialogs_RegisterCustomDialog("FURYSINVENTORYLEDGER_RELOAD", {
     mainText = { text = "<<1>> rows are ready for Excel. The game only writes them to your PC when the interface reloads or you log out.\n\nReload the interface now? You get a short loading screen. After it, run ExportToExcel.cmd from the Windows tools." },
     buttons = {
         { text = "Reload now", callback = function() ReloadUI("ingame") end },
-        { text = "Not now", callback = function() Msg("The Excel list will be written the next time you log out or reload.") end },
+        { text = SI_DIALOG_CANCEL, callback = function() Msg("The Excel list will be written the next time you log out or reload.") end },
     },
 })
 
@@ -742,6 +751,7 @@ local function BuildSettings()
         displayName = TAG .. FIL.title .. "|r",
         author = "Furyous",
         version = FIL.version,
+        website = "https://www.esoui.com/downloads/info5099.html",
         slashCommand = "/ledgersettings",
     })
     LAM:RegisterOptionControls("FurysInventoryLedgerSettings", {
@@ -839,6 +849,34 @@ local function Forget(name)
     Msg("No scanned character named <<1>>. /ledger chars lists them.", typed)
 end
 
+------------------------------------------------------------------------------
+-- Start here (1.6.2): one page on how the ledger works, the same window as every Fury addon.
+------------------------------------------------------------------------------
+local START = {
+    { title = "1. Get your things on the list", lines = {
+        "Log in on each character once. The ledger reads its bags, gear and wallet, the bank and the craft bag by itself, and again a moment after anything changes.",
+        "Open and close each house storage coffer and the Furniture Vault once. Enter each house you own once to count the furniture placed there.",
+        "The summary's Still to read section lists what is missing and how to add it. It disappears when nothing is left.",
+    } },
+    { title = "2. The summary", lines = {
+        "Totals with the change since yesterday, every currency, where your things are, gold over time, space left, sets, split stacks and your most owned items.",
+        "Type part of an item or set name in the Find box (top right) to see how many you own and where, on every character and account.",
+    } },
+    { title = "3. Get it out of the game", lines = {
+        "Copy for Excel opens the whole list as text: Select All, Ctrl+C, paste into Excel or Google Sheets.",
+        "For the full file, use Prepare the Excel file in the settings (or /ledger export) and the free Windows tools (/ledger tools).",
+    } },
+    { title = "4. Settings", lines = {
+        "The gear at the top right opens the settings. Everything that can be turned off starts turned off, such as the line on item tooltips and keeping the Excel file ready.",
+        "Type /ledger help any time for every command.",
+    } },
+}
+
+function FIL.ShowStart()
+    FIL.Theme.StartPage(FurysInventoryLedger_StartHere,
+        FIL.title .. " v" .. FIL.version .. ": every item you own in one list, on every character and account.", START)
+end
+
 local function Slash(args)
     local cmd, rest = (args or ""):match("^%s*(%S*)%s*(.-)%s*$")
     cmd = (cmd or ""):lower()
@@ -855,6 +893,8 @@ local function Slash(args)
         local ok, house, count = ScanPlacedFurniture()
         Msg("Rescanned this character, bank, craft bag and readable storage.")
         if ok then Msg("Counted <<1>> placed furniture in <<2>>.", count, house) end
+    elseif cmd == "start" then
+        FIL.ShowStart()
     elseif cmd == "settings" then
         FIL.OpenSettings()
     elseif cmd == "tools" then
@@ -871,17 +911,18 @@ local function Slash(args)
             Msg("Usage: /ledger sep tab   or   /ledger sep comma")
         end
     else
-        Msg("Commands:")
-        d("  /ledger - open the summary")
-        d("  /ledger find <words> - where an item or set is, across every character and account")
-        d("  /ledger copy - open the copy window (Excel-ready)")
-        d("  /ledger export - prepare the full Excel file for the Windows tools (asks before it reloads)")
-        d("  /ledger scan - rescan everything readable right now")
-        d("  /ledger chars - list scanned characters and who's still missing")
-        d("  /ledger forget <name> - drop a deleted character")
-        d("  /ledger sep tab|comma - separator for the copy window")
-        d("  /ledger settings - open the settings (or the gear on either window)")
-        d("  /ledger tools - get the Windows tools (Excel export) from GitHub")
+        Help(FIL.title .. " v" .. FIL.version .. " commands:")
+        Help("/ledger  open the summary")
+        Help("/ledger start  the Start here page: how the ledger works, in one page")
+        Help("/ledger find WORDS  where an item or set is, across every character and account")
+        Help("/ledger copy  open the copy window (Excel-ready)")
+        Help("/ledger export  prepare the full Excel file for the Windows tools (asks before it reloads)")
+        Help("/ledger scan  rescan everything readable right now")
+        Help("/ledger chars  list scanned characters and who's still missing")
+        Help("/ledger forget NAME  drop a deleted character")
+        Help("/ledger sep tab, /ledger sep comma  separator for the copy window")
+        Help("/ledger settings  open the settings (or the gear on either window)")
+        Help("/ledger tools  get the Windows tools (Excel export) from GitHub")
     end
 end
 
@@ -964,15 +1005,22 @@ local function OnLoaded(_, addonName)
     FIL.Theme.Window(FurysInventoryLedgerWindow)
     FIL.Theme.Window(FurysInventoryLedgerSummary)
     -- The version sits beside each window title, so a build can be told apart at a glance.
-    local versionTag = "  |c8A86B0v" .. FIL.version .. "|r"
-    FurysInventoryLedgerWindow:GetNamedChild("Title"):SetText(FIL.title .. versionTag)
-    FurysInventoryLedgerSummary:GetNamedChild("Title"):SetText(FIL.title .. " - Summary" .. versionTag)
+    -- 1.6.2: the same header as every Fury addon (Theme.lua): title and version, Start here
+    -- after them, the gear and close button at the right, each with a hover tip.
+    local T = FIL.Theme
+    T.SetTitle(FurysInventoryLedgerWindow, FIL.title .. " - Copy for Excel", FIL.version)
+    T.SetTitle(FurysInventoryLedgerSummary, FIL.title, FIL.version)
+    T.StartButton(FurysInventoryLedgerSummary, FIL.ShowStart,
+        "New here? One page on how the ledger works: what it lists, when it reads, the summary and getting it into Excel.\n(also /ledger start)")
+    T.CloseTip(FurysInventoryLedgerWindow:GetNamedChild("Close"))
+    T.CloseTip(FurysInventoryLedgerSummary:GetNamedChild("Close"))
 
     FIL.HookTooltips()
     FurysInventoryLedgerSummary:GetNamedChild("FindBg"):GetNamedChild("Edit"):SetDefaultText("Find an item or set")
 
     SLASH_COMMANDS["/ledger"] = Slash
     BuildSettings()
+    FIL.newInstall = newInstall
 end
 
 EVENT_MANAGER:RegisterForEvent(FIL.name, EVENT_ADD_ON_LOADED, OnLoaded)

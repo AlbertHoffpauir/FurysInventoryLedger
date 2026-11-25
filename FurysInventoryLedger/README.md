@@ -97,6 +97,7 @@ Prepare the Excel file, Keep the Excel file ready, Get the Windows tools, and **
 ## Commands
 
 - `/ledger` open the summary
+- `/ledger start` the Start here page: how the ledger works, in one page
 - `/ledger find <words>` where an item or set is, across every character and account
 - `/ledger copy` open the copy window
 - `/ledger export` prepare the full Excel file for the Windows tools (asks before it reloads)
