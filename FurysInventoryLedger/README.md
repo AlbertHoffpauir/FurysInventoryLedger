@@ -30,13 +30,21 @@ Identical stacks in the same place are added together. Stolen copies get their o
 
 ## Summary page (`/ledger`)
 
+- **Find:** type part of an item or set name in the Find box (top right) to see how many you own and where,
+  on every character and account read so far. Clear the box to go back. `/ledger find <words>` does the same in chat.
+
 - **Tiles:** total items, different items, stacks, gold, vendor value and characters scanned, with the
   change since yesterday.
 - **Currencies:** every currency on characters and in the bank (account-wide ones count as bank), with the total and how much it
   changed since yesterday and over the last 7 days. Currencies update the moment they change.
 - **Where it is:** items, stacks, vendor value and share for each place (characters, companions, bank,
   craft bag, house storage, Furniture Vault, placed furniture).
+- **Gold over time:** a bar for each saved day, up to 120.
+- **Space left:** used and free slots in the bank, each coffer and the Furniture Vault. Each character's free
+  bag slots are in the Characters table. Nearly full shows in amber, full in rose.
 - **By item type** and **by quality:** how many of each you own.
+- **Split stacks:** stackable items kept in more than one place, with the count in each.
+- **Gear by set:** your sets by number of pieces, and who holds them.
 - **Most owned:** your top 25 items by count, and where you keep them.
 - **Characters:** items carried and equipped, gold, and when each was last read. Characters not read
   yet are listed too, and a deleted character is marked with the command that removes it.
@@ -64,6 +72,7 @@ log out, reload or change zone, so step 1 is not needed. It about doubles the si
 If you used the addon before 1.5.0 it is on for you, as before.
 
 **In game:** `/ledger copy` (or **Copy for Excel** on the summary) opens the copy window. Click **Select All**, press Ctrl+C, paste into Excel.
+The **List** picker narrows it to this account, one character or one kind of place, and **Type** to one item type.
 Large lists are split into pages; paste each page under the last. The copy window leaves out the Item Link
 column to keep pages small.
 
@@ -82,11 +91,13 @@ Scanned, Item Link.
 
 The gear on the summary or the copy window, Settings > Addons > Fury's Inventory Ledger, `/ledger settings`
 or `/ledgersettings`: open the summary, copy window separator (tab or comma), open the copy window, rescan now,
-Prepare the Excel file, Keep the Excel file ready, Get the Windows tools.
+Prepare the Excel file, Keep the Excel file ready, Get the Windows tools, and **Show what I own on item tooltips**
+(starts turned off): one line on item tooltips such as "You own 412: Bank 200, Craft Bag 212".
 
 ## Commands
 
 - `/ledger` open the summary
+- `/ledger find <words>` where an item or set is, across every character and account
 - `/ledger copy` open the copy window
 - `/ledger export` prepare the full Excel file for the Windows tools (asks before it reloads)
 - `/ledger scan` read everything that can be read right now

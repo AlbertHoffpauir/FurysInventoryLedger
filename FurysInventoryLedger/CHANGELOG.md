@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.6.1
+- Find results now show the total item count beside the number of matches, on the summary and in chat.
+- Summary page: a cell that is cut short shows its full text when you hover it.
+
+## 1.6.0
+- Find an item: a Find box on the summary page, and /ledger find <words> in chat. Type part of an item or set name to see how many you own and where, on every character and account the addon has read.
+- Copy window: two new pickers. List chooses everything, this account, one character, the bank, craft bag, house storage, Furniture Vault or placed furniture. Type narrows it to one item type. A short list is a page or two instead of dozens.
+- Space left: the Characters table shows each bag's free slots, and a new Space left section does the same for the bank, each coffer and the Furniture Vault. Nearly full shows in amber, full in rose. It fills in the next time each place is read.
+- Split stacks: a new section lists stackable items kept in more than one place, with the count in each, so you can tidy up.
+- Gear by set: a new section lists your sets by number of pieces and who holds them. Type a set name in Find to see each piece.
+- Gold over time: a small bar chart of your gold for every saved day, up to 120.
+- New setting "Show what I own on item tooltips". It adds one line to item tooltips, for example "You own 412: Bank 200, Craft Bag 212". It starts turned off.
+
 ## 1.5.2
 - The version number now shows beside the title of the summary and copy windows.
 

@@ -7,7 +7,7 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.5.2"
+FIL.version = "1.6.1"
 -- The Windows tools (Excel export) can't ship in the ESOUI zip; this page has the download.
 FIL.toolsUrl = "https://github.com/AlbertHoffpauir/FurysInventoryLedger#downloads"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
@@ -63,6 +63,7 @@ local dirty = true
 
 local function NewContainer(owner, location, container)
     dirty = true
+    FIL.dataRev = (FIL.dataRev or 0) + 1   -- lets the tooltip index know it is out of date
     return { owner = owner, location = location, container = container, updated = GetTimeStamp(), items = {} }
 end
 
@@ -185,6 +186,7 @@ local function ScanCharacterBags()
     local name = charRec.name
     local c = NewContainer(name, "Character", "Backpack")
     ReadBag(c, BAG_BACKPACK)
+    c.size, c.used = GetBagSize(BAG_BACKPACK), GetNumBagUsedSlots(BAG_BACKPACK)
     charRec.containers.backpack = Seal(c)
 
     c = NewContainer(name, "Character", "Equipped")
@@ -204,6 +206,8 @@ local function ScanBank()
     local c = NewContainer(ACCOUNT_OWNER, "Bank", "Bank")
     local index = ReadBag(c, BAG_BANK)
     ReadBag(c, BAG_SUBSCRIBER_BANK, index)
+    c.size = GetBagUseableSize(BAG_BANK) + GetBagUseableSize(BAG_SUBSCRIBER_BANK)
+    c.used = GetNumBagUsedSlots(BAG_BANK) + GetNumBagUsedSlots(BAG_SUBSCRIBER_BANK)
     acct.shared.bank = Seal(c)
 end
 
@@ -225,12 +229,14 @@ local function ScanStorageBag(bagId)
     if bagId == BAG_FURNITURE_VAULT then
         local c = NewContainer(ACCOUNT_OWNER, "Furniture Vault", "Furniture Vault")
         ReadBag(c, bagId)
+        c.size, c.used = GetBagSize(bagId), GetNumBagUsedSlots(bagId)
         acct.shared.vault = Seal(c)
     elseif IsHouseBankBag(bagId) then
         local label = CollectibleLabel(GetCollectibleForBag(bagId))
         if label == "" then label = "Storage " .. (bagId - BAG_HOUSE_BANK_ONE + 1) end
         local c = NewContainer(ACCOUNT_OWNER, "House Storage", label)
         ReadBag(c, bagId)
+        c.size, c.used = GetBagSize(bagId), GetNumBagUsedSlots(bagId)
         acct.shared["housebank_" .. bagId] = Seal(c)
     end
 end
@@ -578,19 +584,51 @@ end
 -- Copy window
 ------------------------------------------------------------------------------
 local pages, pageIndex, rowCount = {}, 1, 0
+local allRows = {}                 -- every row, before the two pickers narrow it
+local copyFrom, copyType = nil, nil   -- chosen picker entries (nil = everything / all types)
+local ALL_FROM, ALL_TYPES = "Everything on this PC", "All item types"
 
 local function ShowPage()
     local win = FurysInventoryLedgerWindow
     local edit = win:GetNamedChild("EditBg"):GetNamedChild("Edit")
     edit:SetText(pages[pageIndex] or "")
-    win:GetNamedChild("PageLabel"):SetText(zo_strformat("Page <<1>> of <<2>>", pageIndex, #pages))
+    win:GetNamedChild("PageLabel"):SetText(zo_strformat("Page <<1>> of <<2>>", pageIndex, math.max(#pages, 1)))
     win:GetNamedChild("Prev"):SetEnabled(pageIndex > 1)
     win:GetNamedChild("Next"):SetEnabled(pageIndex < #pages)
 end
 
-function FIL.OpenWindow()
-    FlushPending()
-    local rows = BuildRows()
+-- The "List" picker: everything, this account, one character, or one kind of place.
+local function FromChoices()
+    local key = FIL.accountKey
+    local list = { { name = ALL_FROM }, { name = "This account", col = 1, value = key } }
+    local names = {}
+    for _, ch in pairs(acct.chars) do names[#names + 1] = ch.name end
+    table.sort(names)
+    for _, name in ipairs(names) do list[#list + 1] = { name = name, col = 2, value = name } end
+    for _, loc in ipairs({ "Bank", "Craft Bag", "House Storage", "Furniture Vault", "Placed in House" }) do
+        list[#list + 1] = { name = loc, col = 3, value = loc }
+    end
+    return list
+end
+
+local function RowsFrom(choice)
+    if not choice or not choice.col then return allRows end
+    local key, out = FIL.accountKey, {}
+    for _, r in ipairs(allRows) do
+        if r[1] == key and r[choice.col] == choice.value then out[#out + 1] = r end
+    end
+    return out
+end
+
+local function ApplyCopyFilter()
+    local rows = RowsFrom(copyFrom)
+    if copyType then
+        local out = {}
+        for _, r in ipairs(rows) do
+            if r[8] == copyType then out[#out + 1] = r end
+        end
+        rows = out
+    end
     rowCount = #rows
     pages = Paginate(BuildCopyLines(rows))
     pageIndex = 1
@@ -601,6 +639,59 @@ function FIL.OpenWindow()
             or "<<1>> rows, <<2>>. Click Select All, press Ctrl+C, then paste into Excel.",
         ZO_CommaDelimitNumber(rowCount), sepName, #pages))
     ShowPage()
+end
+
+-- The "Type" picker only offers item types that the chosen list really holds.
+local function FillTypeCombo()
+    local combo = ZO_ComboBox_ObjectFromContainer(FurysInventoryLedgerWindow:GetNamedChild("Type"))
+    local seen, types = {}, {}
+    for _, r in ipairs(RowsFrom(copyFrom)) do
+        local t = r[8]
+        if t ~= "" and not seen[t] then seen[t] = true; types[#types + 1] = t end
+    end
+    table.sort(types)
+    if copyType and not seen[copyType] then copyType = nil end
+    combo:SetSortsItems(false)
+    combo:ClearItems()
+    combo:AddItem(combo:CreateItemEntry(ALL_TYPES, function() FIL.PickCopyType(nil) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
+    for _, t in ipairs(types) do
+        combo:AddItem(combo:CreateItemEntry(t, function() FIL.PickCopyType(t) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
+    end
+    combo:UpdateItems()
+    combo:SetSelectedItemText(copyType or ALL_TYPES)
+end
+
+local function FillFromCombo()
+    local combo = ZO_ComboBox_ObjectFromContainer(FurysInventoryLedgerWindow:GetNamedChild("From"))
+    combo:SetSortsItems(false)
+    combo:ClearItems()
+    local still = false
+    for _, choice in ipairs(FromChoices()) do
+        if copyFrom and copyFrom.name == choice.name then copyFrom, still = choice, true end
+        combo:AddItem(combo:CreateItemEntry(choice.name, function() FIL.PickCopyFrom(choice) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
+    end
+    if not still then copyFrom = nil end
+    combo:UpdateItems()
+    combo:SetSelectedItemText(copyFrom and copyFrom.name or ALL_FROM)
+end
+
+function FIL.PickCopyFrom(choice)
+    copyFrom = choice
+    FillTypeCombo()
+    ApplyCopyFilter()
+end
+
+function FIL.PickCopyType(itemType)
+    copyType = itemType
+    ApplyCopyFilter()
+end
+
+function FIL.OpenWindow()
+    FlushPending()
+    allRows = BuildRows()
+    FillFromCombo()
+    FillTypeCombo()
+    ApplyCopyFilter()
     SCENE_MANAGER:Show(FIL.COPY_SCENE)
 end
 
@@ -670,6 +761,12 @@ local function BuildSettings()
         { type = "button", name = "Open the copy window",
           tooltip = "Opens the whole list as text you can copy and paste into Excel. /ledger copy does the same.",
           func = function() FIL.OpenWindow() end },
+
+        { type = "header", name = "Item tooltips" },
+        { type = "checkbox", name = "Show what I own on item tooltips",
+          tooltip = "Adds one line to item tooltips, for example: You own 412: Bank 200, Craft Bag 212. It counts every character and account the addon has read. Starts turned off.",
+          getFunc = function() return SV.settings.tooltip end,
+          setFunc = function(value) SV.settings.tooltip = value end },
 
         { type = "header", name = "Scanning" },
         { type = "button", name = "Rescan now",
@@ -751,6 +848,8 @@ local function Slash(args)
         FIL.OpenWindow()
     elseif cmd == "export" or cmd == "excel" then
         FIL.PrepareExport()
+    elseif cmd == "find" then
+        FIL.FindToChat(rest)
     elseif cmd == "scan" then
         ScanEverythingReadable()
         local ok, house, count = ScanPlacedFurniture()
@@ -774,6 +873,7 @@ local function Slash(args)
     else
         Msg("Commands:")
         d("  /ledger - open the summary")
+        d("  /ledger find <words> - where an item or set is, across every character and account")
         d("  /ledger copy - open the copy window (Excel-ready)")
         d("  /ledger export - prepare the full Excel file for the Windows tools (asks before it reloads)")
         d("  /ledger scan - rescan everything readable right now")
@@ -797,6 +897,8 @@ FIL.FormatTime    = FormatTime
 FIL.FlushPending  = FlushPending
 FIL.Msg           = Msg
 function FIL.GetAccount() return acct end
+function FIL.GetAllAccounts() return SV.accounts end
+function FIL.TooltipWanted() return SV.settings.tooltip end
 
 ------------------------------------------------------------------------------
 -- Init
@@ -865,6 +967,9 @@ local function OnLoaded(_, addonName)
     local versionTag = "  |c8A86B0v" .. FIL.version .. "|r"
     FurysInventoryLedgerWindow:GetNamedChild("Title"):SetText(FIL.title .. versionTag)
     FurysInventoryLedgerSummary:GetNamedChild("Title"):SetText(FIL.title .. " - Summary" .. versionTag)
+
+    FIL.HookTooltips()
+    FurysInventoryLedgerSummary:GetNamedChild("FindBg"):GetNamedChild("Edit"):SetDefaultText("Find an item or set")
 
     SLASH_COMMANDS["/ledger"] = Slash
     BuildSettings()

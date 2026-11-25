@@ -22,6 +22,7 @@ ESO gives you no list of what you own. Here, the [B]copy window[/B] puts every i
 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]At a glance[/B][/COLOR][/FONT][/SIZE]
 [QUOTE][LIST]
+[*][COLOR="#A08CFF"][B]Find:[/B][/COLOR]  Type part of an item or set name and see where every copy is, on every character and account.
 [*][COLOR="#A08CFF"][B]Summary:[/B][/COLOR]  Totals, currencies with day and week changes, where it all is, and your most-owned items.
 [*][COLOR="#A08CFF"][B]Copy window:[/B][/COLOR]  The whole list as text, ready to paste straight into Excel columns.
 [*][COLOR="#A08CFF"][B]Excel export:[/B][/COLOR]  One CSV with every item and 24 columns, from a separate Windows download.
@@ -56,10 +57,15 @@ ESO gives you no list of what you own. Here, the [B]copy window[/B] puts every i
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]Summary page[/B][/COLOR][/FONT][/SIZE]
 [COLOR="#B4B0D8"][I][FONT="Courier New"][B]/ledger[/B][/FONT][/I][/COLOR]
 [LIST]
+[*][B]Find:[/B] type part of an item or set name in the Find box to see how many you own and where, on every character and account read so far. Clear the box to go back. [FONT="Courier New"][B]/ledger find <words>[/B][/FONT] does the same in chat.
 [*][B]Tiles:[/B] total items, different items, stacks, gold, vendor value and characters read, with the change since yesterday.
 [*][B]Currencies:[/B] every currency on characters and in the bank (account-wide ones count as bank), with the total and how much it changed since yesterday and over the last 7 days. Currencies update the moment they change.
 [*][B]Where it is:[/B] items, stacks, vendor value and share for each place: characters, companions, bank, craft bag, house storage, Furniture Vault and placed furniture.
+[*][B]Gold over time:[/B] a bar for each saved day, up to 120.
+[*][B]Space left:[/B] used and free slots in the bank, each coffer and the Furniture Vault, and each character's free bag slots. Nearly full shows in amber, full in rose.
 [*][B]By item type[/B] and [B]by quality:[/B] how many of each you own.
+[*][B]Split stacks:[/B] stackable items kept in more than one place, with the count in each.
+[*][B]Gear by set:[/B] your sets by number of pieces, and who holds them.
 [*][B]Most owned:[/B] your top 25 items by count, and where you keep them.
 [*][B]Characters:[/B] items carried and equipped, gold, and when each was last read. Characters not read yet are listed too, and a deleted character is marked with the command that removes it.
 [/LIST]
@@ -69,6 +75,7 @@ The change columns compare against a total saved once a day (at logout, reload, 
 [COLOR="#B4B0D8"][I][FONT="Courier New"][B]/ledger copy[/B][/FONT], or Copy for Excel on the summary[/I][/COLOR]
 [LIST]
 [*]Click [B]Select All[/B], press Ctrl+C, and paste into Excel. Tab-separated text pastes straight into columns.
+[*]The [B]List[/B] picker narrows it to this account, one character or one kind of place, and [B]Type[/B] to one item type.
 [*]Large lists are split into pages. Paste each page under the last.
 [*]The copy window leaves out the Item Link column to keep pages small. The Excel export has it.
 [/LIST]
@@ -91,10 +98,11 @@ The .cmd and .ps1 files in the Windows tools zip are plain-text scripts (batch a
 Account, Character, Location, Container, Item, Qty, Quality, Item Type, Sub Type, Equip Slot, Armor/Weapon, Trait, Set, Style, Level, CP, Bound, Stolen, Crafted, Vendor Value (each), Vendor Value (total), Item ID, Scanned, Item Link.
 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]Settings, commands and keys[/B][/COLOR][/FONT][/SIZE]
-[B]Settings:[/B] the gear on the summary or the copy window, Settings > Addons > Fury's Inventory Ledger, or [FONT="Courier New"][B]/ledger settings[/B][/FONT]. Open the summary, pick the copy window separator (tab or comma), open the copy window, rescan now, prepare the Excel file, or keep the Excel file ready.
+[B]Settings:[/B] the gear on the summary or the copy window, Settings > Addons > Fury's Inventory Ledger, or [FONT="Courier New"][B]/ledger settings[/B][/FONT]. Open the summary, pick the copy window separator (tab or comma), open the copy window, rescan now, prepare the Excel file, keep the Excel file ready, or show what you own on item tooltips (one line such as "You own 412: Bank 200, Craft Bag 212"; starts turned off).
 [B]Keys:[/B] Controls > Addon Keybinds > Fury's Inventory Ledger has "Open/close the summary" and "Open/close the copy window". Both start unbound.
 [LIST]
 [*][FONT="Courier New"][B]/ledger[/B][/FONT] open the summary
+[*][FONT="Courier New"][B]/ledger find <words>[/B][/FONT] where an item or set is, across every character and account
 [*][FONT="Courier New"][B]/ledger copy[/B][/FONT] open the copy window
 [*][FONT="Courier New"][B]/ledger export[/B][/FONT] prepare the full Excel file for the Windows tools (asks before it reloads)
 [*][FONT="Courier New"][B]/ledger scan[/B][/FONT] read everything that can be read right now

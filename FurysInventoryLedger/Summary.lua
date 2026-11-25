@@ -147,7 +147,9 @@ function FIL.SummaryAggregate()
     end
 
     for id, ch in pairs(acct.chars) do
-        local entry = { id = id, name = ch.name or "?", carried = 0, equipped = 0, gold = 0, updated = ch.updated }
+        local pack = ch.containers.backpack
+        local entry = { id = id, name = ch.name or "?", carried = 0, equipped = 0, gold = 0, updated = ch.updated,
+            size = pack and pack.size, used = pack and pack.used }
         r.chars[#r.chars + 1] = entry
         for _, cont in pairs(ch.containers) do addContainer(cont, entry) end
     end
@@ -192,6 +194,16 @@ local labels, textures = {}, {}
 local usedLabels, usedTextures = 0, 0
 local y = 0
 
+function FIL.ShowCutText(label)
+    if not label:WasTruncated() then return end
+    InitializeTooltip(InformationTooltip, label, BOTTOM, 0, -4)
+    SetTooltipText(InformationTooltip, label:GetText())
+end
+
+function FIL.HideCutText()
+    ClearTooltip(InformationTooltip)
+end
+
 local function ResetCanvas()
     for i = 1, usedLabels do labels[i]:SetHidden(true) end
     for i = 1, usedTextures do textures[i]:SetHidden(true) end
@@ -205,6 +217,10 @@ local function NewLabel(x, top, width, height, text, font, color, align)
         l = WINDOW_MANAGER:CreateControl("FurysInventoryLedgerSummaryLabel" .. usedLabels, child, CT_LABEL)
         l:SetVerticalAlignment(TEXT_ALIGN_CENTER)
         l:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+        -- A cell that is cut short shows its full text on hover.
+        l:SetMouseEnabled(true)
+        l:SetHandler("OnMouseEnter", FIL.ShowCutText)
+        l:SetHandler("OnMouseExit", FIL.HideCutText)
         labels[usedLabels] = l
     end
     l:ClearAnchors()
@@ -282,6 +298,88 @@ end
 ------------------------------------------------------------------------------
 local RIGHT, LEFT = TEXT_ALIGN_RIGHT, TEXT_ALIGN_LEFT
 
+local FIND_ROWS = 150
+local findText = ""
+
+-- "37 free of 210", or a hint when the place was last read by a version that did not save sizes.
+local function FreeText(size, used)
+    if not size or not used then return "log in to fill" end
+    return zo_strformat("<<1>> free of <<2>>", Num(size - used), Num(size))
+end
+
+-- Free space colors: rose when full, amber when nearly full.
+local function FreeColor(size, used)
+    if not size or not used then return T.MUTED end
+    local free = size - used
+    if free <= 0 then return T.BAD end
+    if free * 10 <= size then return T.WARN end
+    return T.TEXT
+end
+
+-- The page while the Find box holds words: one row per matching item, every account.
+local function DrawFind()
+    local list = FIL.Find(findText)
+    local rows, total = {}, 0
+    for _, e in ipairs(list) do total = total + e.qty end
+    for i, e in ipairs(list) do
+        if i > FIND_ROWS then break end
+        rows[#rows + 1] = { cells = { e.name, e.kind, Num(e.qty), FIL.PlacesText(e, 8) }, colors = { [2] = T.SUB } }
+    end
+    local note = (#list > FIND_ROWS) and zo_strformat("Showing the first <<1>>. Add a word to narrow it.", FIND_ROWS)
+        or "Clear the box to go back to the summary"
+    Section(zo_strformat("<<1>> matches, <<2>> items for \"<<3>>\"", Num(#list), Num(total), findText), note)
+    if #rows == 0 then
+        y = y + 10
+        NewLabel(0, y, CONTENT_WIDTH, 24, "Nothing you own matches. It searches item names and set names on every character and account read so far.", T.FONT_BODY, T.SUB)
+        y = y + 30
+        NewLabel(0, y, CONTENT_WIDTH, 24, "Clear the box to see what is still to read.", T.FONT_BODY, T.MUTED)
+        y = y + 24
+    else
+        Table({
+            { "Item", 280, LEFT }, { "Type or set", 190, LEFT }, { "Count", 80, RIGHT }, { "Where", 370, LEFT },
+        }, rows)
+    end
+    y = y + 24
+    NewRect(0, y, CONTENT_WIDTH, 1, ZO_ColorDef:New(0, 0, 0, 0))
+end
+
+-- Gold over the saved days as a row of bars, oldest on the left.
+local function GoldChart(history, goldName)
+    local days = {}
+    for day, snap in pairs(history) do
+        if snap.cur and snap.cur[goldName] then days[#days + 1] = day end
+    end
+    table.sort(days)
+    Section("Gold over time", (#days > 1) and zo_strformat("<<1>> saved days, <<2>> to <<3>>", #days, days[1], days[#days]) or nil)
+    if #days < 2 then
+        NewLabel(0, y, CONTENT_WIDTH, ROW_H, "The chart starts on your second day with the addon. One total is saved per day you play.", T.FONT_BODY, T.SUB)
+        y = y + ROW_H
+        return
+    end
+    local low, high = math.huge, 0
+    for _, day in ipairs(days) do
+        local g = history[day].cur[goldName]
+        if g < low then low = g end
+        if g > high then high = g end
+    end
+    local CHART_H, LABEL_W = 90, 150
+    local plotW = CONTENT_WIDTH - LABEL_W
+    local barW = math.min(40, math.floor(plotW / #days))
+    local span = high - low
+    NewLabel(0, y, LABEL_W - 10, 20, Gold(high), "ZoFontGameSmall", T.GOLD, RIGHT)
+    NewLabel(0, y + CHART_H - 20, LABEL_W - 10, 20, Gold(low), "ZoFontGameSmall", T.GOLD, RIGHT)
+    NewRect(LABEL_W, y + CHART_H, plotW, 1, T.EDGE)
+    for i, day in ipairs(days) do
+        local g = history[day].cur[goldName]
+        -- the lowest day still gets a short bar, so every saved day is visible
+        local h = 8 + ((span > 0) and math.floor((g - low) * (CHART_H - 8) / span) or 0)
+        NewRect(LABEL_W + (i - 1) * barW, y + CHART_H - h, math.max(barW - 2, 1), h, (i == #days) and T.GOLD or T.VIOLET)
+    end
+    y = y + CHART_H + 6
+    NewLabel(LABEL_W, y, plotW, 18, "Each bar is one saved day, oldest on the left; today is gold. Bars run from your lowest to your highest total.", "ZoFontGameSmall", T.MUTED)
+    y = y + 18
+end
+
 local function Draw()
     FIL.FlushPending()
     local acct = FIL.GetAccount()
@@ -315,6 +413,11 @@ local function Draw()
         FIL.accountKey, scanned, numOnAccount))
 
     ResetCanvas()
+
+    if findText ~= "" then
+        DrawFind()
+        return
+    end
 
     -- Tiles
     -- Returns the "+12 since yesterday" text and the change itself (for its color).
@@ -404,6 +507,8 @@ local function Draw()
         { "vs " .. SinceLabel(yDay, Day(1), "yesterday"), 110, RIGHT }, { "vs " .. SinceLabel(wDay, Day(7), "7 days"), 110, RIGHT },
     }, curRows)
 
+    GoldChart(history, r.goldName)
+
     -- Where it is
     local locRows = {}
     for _, name in ipairs(LOCATION_ORDER) do
@@ -417,6 +522,34 @@ local function Draw()
         { "Location", 300, LEFT }, { "Items", 150, RIGHT }, { "Stacks", 150, RIGHT },
         { "Vendor value", 170, RIGHT }, { "Share of items", 150, RIGHT },
     }, locRows)
+
+    -- Space left: the bank and storage here, each character's bag in the Characters table.
+    local spaceRows = {}
+    local function addSpace(name, cont)
+        if cont and (cont.size or 0) > 0 then
+            spaceRows[#spaceRows + 1] = {
+                cells = { name, Num(cont.used), Num(cont.size), Num(cont.size - cont.used) },
+                colors = { [4] = FreeColor(cont.size, cont.used) },
+            }
+        end
+    end
+    addSpace("Bank", acct.shared.bank)
+    local coffers = {}
+    for key, cont in pairs(acct.shared) do
+        if key:sub(1, 10) == "housebank_" then coffers[#coffers + 1] = cont end
+    end
+    table.sort(coffers, function(a, b) return a.container < b.container end)
+    for _, cont in ipairs(coffers) do addSpace(cont.container, cont) end
+    addSpace("Furniture Vault", acct.shared.vault)
+    Section("Space left", "Coffers and the Furniture Vault update when opened")
+    if #spaceRows == 0 then
+        NewLabel(0, y, CONTENT_WIDTH, ROW_H, "Fills in the next time each place is read: log in, and open each coffer once.", T.FONT_BODY, T.SUB)
+        y = y + ROW_H
+    else
+        Table({
+            { "Place", 400, LEFT }, { "Used", 170, RIGHT }, { "Slots", 170, RIGHT }, { "Free", 180, RIGHT },
+        }, spaceRows)
+    end
 
     -- By item type
     local typeRows = {}
@@ -455,6 +588,44 @@ local function Draw()
         { "Item", 300, LEFT }, { "Type", 190, LEFT }, { "Count", 110, RIGHT }, { "Kept in", 320, LEFT },
     }, itemRows)
 
+    -- Split stacks
+    local SPLIT_ROWS = 25
+    local split = FIL.SplitStacks()
+    local splitRows = {}
+    for i, e in ipairs(split) do
+        if i > SPLIT_ROWS then break end
+        splitRows[#splitRows + 1] = { cells = { e.name, Num(#e.places), Num(e.qty), FIL.PlacesText(e, 8) } }
+    end
+    Section("Split stacks", (#split > SPLIT_ROWS) and zo_strformat("<<1>> of <<2>>, most places first", SPLIT_ROWS, #split)
+        or "The same stackable item kept in more than one place")
+    if #splitRows == 0 then
+        NewLabel(0, y, CONTENT_WIDTH, ROW_H, "Nothing is split across places. Every stackable item sits in one spot.", T.FONT_BODY, T.SUB)
+        y = y + ROW_H
+    else
+        Table({
+            { "Item", 280, LEFT }, { "Places", 80, RIGHT }, { "Total", 90, RIGHT }, { "Where", 470, LEFT },
+        }, splitRows)
+    end
+
+    -- Gear by set
+    local SET_ROWS = 25
+    local sets = FIL.Sets()
+    local setRows = {}
+    for i, e in ipairs(sets) do
+        if i > SET_ROWS then break end
+        setRows[#setRows + 1] = { cells = { e.name, Num(e.qty), FIL.PlacesText(e, 8) } }
+    end
+    Section("Gear by set", (#sets > SET_ROWS) and zo_strformat("<<1>> of <<2>> sets. Type a set name in Find for the rest.", SET_ROWS, #sets)
+        or "Type a set name in Find to see each piece")
+    if #setRows == 0 then
+        NewLabel(0, y, CONTENT_WIDTH, ROW_H, "No set pieces read yet.", T.FONT_BODY, T.SUB)
+        y = y + ROW_H
+    else
+        Table({
+            { "Set", 300, LEFT }, { "Pieces", 90, RIGHT }, { "Who holds them", 530, LEFT },
+        }, setRows)
+    end
+
     -- Characters
     table.sort(r.chars, function(a, b) return a.name < b.name end)
     local charRows = {}
@@ -462,21 +633,21 @@ local function Draw()
         if c.gone then
             -- Still counted in the totals until the player drops it.
             charRows[#charRows + 1] = { dim = true,
-                cells = { c.name, Num(c.carried), Num(c.equipped), Gold(c.gold), "Deleted? /ledger forget " .. c.name } }
+                cells = { c.name, Num(c.carried), "", Num(c.equipped), Gold(c.gold), "Deleted? /ledger forget " .. c.name } }
         else
             charRows[#charRows + 1] = {
-                cells  = { c.name, Num(c.carried), Num(c.equipped), Gold(c.gold), FIL.FormatTime(c.updated) },
-                colors = { [4] = T.GOLD, [5] = T.SUB },
+                cells  = { c.name, Num(c.carried), FreeText(c.size, c.used), Num(c.equipped), Gold(c.gold), FIL.FormatTime(c.updated) },
+                colors = { [3] = FreeColor(c.size, c.used), [5] = T.GOLD, [6] = T.SUB },
             }
         end
     end
     for _, name in ipairs(missingChars) do
-        charRows[#charRows + 1] = { dim = true, cells = { name, "", "", "", "Not read yet - log in once" } }
+        charRows[#charRows + 1] = { dim = true, cells = { name, "", "", "", "", "Not read yet - log in once" } }
     end
     Section("Characters")
     Table({
-        { "Character", 260, LEFT }, { "Carried", 120, RIGHT }, { "Equipped", 120, RIGHT },
-        { r.goldName, 150, RIGHT }, { "Last read", 270, RIGHT },
+        { "Character", 230, LEFT }, { "Carried", 90, RIGHT }, { "Bag space", 150, RIGHT }, { "Equipped", 90, RIGHT },
+        { r.goldName, 140, RIGHT }, { "Last read", 220, RIGHT },
     }, charRows)
 
     y = y + 20
@@ -497,6 +668,20 @@ function FIL.OpenSummary()
     Draw()
     ZO_Scroll_ResetToTop(scroll)
     SCENE_MANAGER:Show(FIL.SUMMARY_SCENE)
+end
+
+-- The Find box: redraw a moment after the last key, so typing stays smooth.
+function FIL.OnFindChanged(edit)
+    local text = zo_strtrim(edit:GetText() or "")
+    if text == findText then return end
+    findText = text
+    EVENT_MANAGER:UnregisterForUpdate("FurysInventoryLedgerFind")
+    EVENT_MANAGER:RegisterForUpdate("FurysInventoryLedgerFind", 300, function()
+        EVENT_MANAGER:UnregisterForUpdate("FurysInventoryLedgerFind")
+        if not SCENE_MANAGER:IsShowing(FIL.SUMMARY_SCENE) then return end
+        Draw()
+        ZO_Scroll_ResetToTop(FurysInventoryLedgerSummary:GetNamedChild("Body"))
+    end)
 end
 
 function FIL.ToggleSummary()
