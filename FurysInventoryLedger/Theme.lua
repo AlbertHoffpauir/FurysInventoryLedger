@@ -236,6 +236,59 @@ function T.TabLine(name, tabs)
 end
 
 ------------------------------------------------------------------------------
+-- More from Fury: the other public Fury addons, in the same words everywhere. Shown at the end
+-- of a Start here page and of the settings page; the addon you are in is left out.
+------------------------------------------------------------------------------
+T.MORE_TITLE = "More from Fury"
+T.MORE_FOOT = "All free on ESOUI and in Minion: search for \"Fury's\"."
+
+local MORE = {
+    { global = "FurysGuildToolset", name = "Fury's Guild Management Toolset", short = "Guild Toolset",
+      about = "an officer's toolkit: bank alerts, member and inactivity reports, trader week totals, raffles, event sign-ups and recruiting.",
+      url = "https://www.esoui.com/downloads/info5063.html" },
+    { global = "FurysCharacterTracker", name = "Fury's Character Tracker", short = "Character Tracker",
+      about = "every character on one board: skill lines, crafting, research, daily writs, wallet and gear.",
+      url = "https://www.esoui.com/downloads/info5078.html" },
+    { global = "FurysInventoryLedger", name = "Fury's Inventory Ledger", short = "Inventory Ledger",
+      about = "every item you own in one list, across all your characters, the bank and your houses, with export to Excel.",
+      url = "https://www.esoui.com/downloads/info5099.html" },
+    { global = "FurysAccountSync", name = "Fury's Account Sync", short = "Account Sync",
+      about = "make your other accounts on this PC match your main one: settings, keybinds, addon settings and builds.",
+      url = "https://www.esoui.com/downloads/info5106.html" },
+}
+
+-- The other addons: { name, short, about, url } each.
+function T.More()
+    local list = {}
+    for _, entry in ipairs(MORE) do
+        if _G[entry.global] ~= A then list[#list + 1] = entry end
+    end
+    return list
+end
+
+-- One "Name: what it does" line per addon, then where to get them.
+function T.MoreLines()
+    local lines = {}
+    for _, entry in ipairs(T.More()) do
+        lines[#lines + 1] = entry.name .. ": " .. entry.about
+    end
+    lines[#lines + 1] = T.MORE_FOOT
+    return lines
+end
+
+-- Adds the section to the end of a LibAddonMenu options list: the lines, and a button per addon
+-- that opens its ESOUI page (the game asks before it opens a web page).
+function T.MoreOptions(options)
+    options[#options + 1] = { type = "header", name = T.MORE_TITLE }
+    options[#options + 1] = { type = "description", text = table.concat(T.MoreLines(), "\n") }
+    for _, entry in ipairs(T.More()) do
+        local function Open() RequestOpenUnsafeURL(entry.url) end
+        options[#options + 1] = { type = "button", name = entry.short, width = "half", func = Open,
+            tooltip = "Opens the ESOUI page of " .. entry.name .. " in your web browser. The game asks first." }
+    end
+end
+
+------------------------------------------------------------------------------
 -- Start here page: a window (from the addon's StartHere.xml) with numbered sections.
 -- sections = { { title = "1. ...", lines = { "...", "..." } }, ... }
 ------------------------------------------------------------------------------
@@ -265,6 +318,10 @@ function T.FillStartPage(win, intro, sections)
         for _, line in ipairs(section.lines) do
             Add(line, "ZoFontGame", T.TEXT, 6)
         end
+    end
+    Add(T.MORE_TITLE, T.FONT_SECTION, T.BLUE, 16)
+    for _, line in ipairs(T.MoreLines()) do
+        Add(line, "ZoFontGame", T.SUB, 6)
     end
 end
 

@@ -7,7 +7,7 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.6.2"
+FIL.version = "1.6.3"
 -- The Windows tools (Excel export) can't ship in the ESOUI zip; this page has the download.
 FIL.toolsUrl = "https://github.com/AlbertHoffpauir/FurysInventoryLedger#downloads"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
@@ -754,7 +754,7 @@ local function BuildSettings()
         website = "https://www.esoui.com/downloads/info5099.html",
         slashCommand = "/ledgersettings",
     })
-    LAM:RegisterOptionControls("FurysInventoryLedgerSettings", {
+    local options = {
         { type = "header", name = "Summary" },
         { type = "button", name = "Open the summary",
           tooltip = "Opens the summary window. /ledger does the same, and you can bind a key under Controls > Addon Keybinds.",
@@ -803,7 +803,9 @@ local function BuildSettings()
         { type = "button", name = "Get the Windows tools",
           tooltip = "Opens the download page on GitHub in your browser. The game asks before it opens.",
           func = function() RequestOpenUnsafeURL(FIL.toolsUrl) end },
-    })
+    }
+    FIL.Theme.MoreOptions(options)   -- 1.6.3: the other Fury addons, at the very end
+    LAM:RegisterOptionControls("FurysInventoryLedgerSettings", options)
 end
 
 -- The gear on the copy window, /ledger settings and /ledgersettings all land here.

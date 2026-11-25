@@ -119,6 +119,14 @@ Prepare the Excel file, Keep the Excel file ready, Get the Windows tools, and **
   one that saves last wins. Let one client log out before the other logs in.
 - Item names, qualities and types come from the game in your client's language. Column headings are in English.
 
+## More from Fury
+
+- [Fury's Guild Management Toolset](https://www.esoui.com/downloads/info5063.html): an officer's toolkit: bank alerts, member and inactivity reports, trader week totals, raffles, event sign-ups and recruiting.
+- [Fury's Character Tracker](https://www.esoui.com/downloads/info5078.html): every character on one board: skill lines, crafting, research, daily writs, wallet and gear.
+- [Fury's Account Sync](https://www.esoui.com/downloads/info5106.html): make your other accounts on this PC match your main one: settings, keybinds, addon settings and builds.
+
+All free on ESOUI and in Minion.
+
 ## Credits
 
 - Settings page uses **LibAddonMenu-2.0** by Seerah and sirinsidiator.
