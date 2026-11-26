@@ -7,7 +7,7 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.6.8"
+FIL.version = "1.7.4"
 -- The Windows tools (Excel export) can't ship in the ESOUI zip; this page has the download.
 FIL.toolsUrl = "https://github.com/AlbertHoffpauir/FurysInventoryLedger#downloads"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
@@ -1011,6 +1011,8 @@ local function OnLoaded(_, addonName)
         "New here? One page on how the ledger works: what it lists, when it reads, the summary and getting it into Excel.\n(also /ledger start)")
     T.CloseTip(FurysInventoryLedgerWindow:GetNamedChild("Close"))
     T.CloseTip(FurysInventoryLedgerSummary:GetNamedChild("Close"))
+    -- The other Fury addons, one click each, in the title bar (Theme.lua).
+    T.TitleIcons(FurysInventoryLedgerSummary, FurysInventoryLedgerSummary:GetNamedChild("Settings"))
 
     FIL.HookTooltips()
     FurysInventoryLedgerSummary:GetNamedChild("FindBg"):GetNamedChild("Edit"):SetDefaultText("Find an item or set")

@@ -1,6 +1,6 @@
 -- Fury Night: the shared library of Fury's addons. Look (colors, fonts, window header, tabs,
 -- Start here page), chat lines, the welcome line, confirm pop-ups, "More from Fury" and the
--- Fury addons menu (/fury). The same file ships in every Fury addon, so they all look and behave
+-- Fury sidebar and addons list (/fury). The same file ships in every Fury addon, so they all look and behave
 -- the same. Only the six lines below differ: it hangs off that addon's own table, so no addon
 -- depends on another one being installed. Its one global, FurysAddonMenu, is the list the
 -- installed Fury addons put themselves on for the menu.
@@ -50,7 +50,7 @@ end
 -- Which version of this shared file an addon carries. Raise it with every change to the file,
 -- then copy the file into every addon.
 ------------------------------------------------------------------------------
-T.LIB = 7
+T.LIB = 12
 
 ------------------------------------------------------------------------------
 -- Chat: every line an addon prints starts with its name in violet, "[Guild Toolset] text".
@@ -212,14 +212,29 @@ end
 ------------------------------------------------------------------------------
 T.VERSION_COLOR = "|c8A86B0"
 
--- "Fury's Something  v1.2.3", the version muted.
+T.FONT_VERSION = "$(MEDIUM_FONT)|13|soft-shadow-thin"
+
+-- "Fury's Something  v1.2.3" in one text, the version muted (for places without a title bar).
 function T.TitleText(text, version)
     return text .. "  " .. T.VERSION_COLOR .. "v" .. version .. "|r"
 end
 
--- Sets a window's title with its version. `name` is the Title label's child name (default "Title").
+-- Sets a window's title, with its version in small print right after it (a label of its own,
+-- `<window>FuryVersion`, sitting on the title's baseline). `name` is the Title label's child
+-- name (default "Title").
 function T.SetTitle(win, text, version, name)
-    win:GetNamedChild(name or "Title"):SetText(T.TitleText(text, version))
+    local label = win:GetNamedChild(name or "Title")
+    local info = win.furyTitle
+    if not info then
+        local small = WINDOW_MANAGER:CreateControl(win:GetName() .. "FuryVersion", win, CT_LABEL)
+        small:SetFont(T.FONT_VERSION)
+        small:SetAnchor(BOTTOMLEFT, label, BOTTOMRIGHT, 8, -5)
+        info = { versionLabel = small }
+        win.furyTitle = info
+    end
+    info.label, info.text, info.version = label, text, version
+    label:SetText(text)
+    info.versionLabel:SetText(T.VERSION_COLOR .. "v" .. version .. "|r")
 end
 
 local function ShowTip(control, text)
@@ -258,11 +273,18 @@ function T.Gear(win, anchorTo, onClick, tip)
     return gear
 end
 
+-- How far right of the title label the Start here button starts: past the small version.
+function T.StartOffset(win)
+    local info = win.furyTitle
+    if not info then return 14 end
+    return 8 + info.versionLabel:GetTextWidth() + 14
+end
+
 -- The Start here button, right after the title and its version.
 function T.StartButton(win, onClick, tip, title)
     local start = WINDOW_MANAGER:CreateControlFromVirtual(win:GetName() .. "StartHere", win, "ZO_DefaultButton")
     start:SetDimensions(110, 28)
-    start:SetAnchor(LEFT, title or win:GetNamedChild("Title"), RIGHT, 14, 0)
+    start:SetAnchor(LEFT, title or win:GetNamedChild("Title"), RIGHT, T.StartOffset(win), 0)
     start:SetDrawLayer(DL_CONTROLS)
     start:SetDrawLevel(1)
     start:SetText("Start here")
@@ -414,26 +436,51 @@ function T.StartPage(win, intro, sections)
 end
 
 ------------------------------------------------------------------------------
--- The Fury addons menu: one small window that lists every Fury addon you have installed, each
--- with an Open and a Settings button. /fury opens it, and so does the key "Open the Fury addons
--- menu" under Fury's Addons in Controls > Keybindings. That one key lives in the small
--- FurysAddonMenu folder that ships inside every Fury addon; the game loads the folder once, so
--- the key shows once however many Fury addons are installed.
+-- The Fury sidebar and the Fury addons list.
 --
--- Each addon's copy of this file puts that addon on the shared list (FurysAddonMenu.entries), so
--- an addon never has to know the names of the others. The window is built once, the first time
--- it is opened, by the newest copy of this file among the installed addons.
+-- The sidebar is a slim bar of icons, one per Fury addon you have installed, that can stay on
+-- screen, as a column or a row: left-click an icon to open that addon, right-click for its
+-- settings. Drag it by its violet line. /fury shows or hides it, and so does the key "Show or hide the Fury sidebar" under
+-- Fury's Addons in Controls > Keybindings. It starts turned off.
+--
+-- The list (/fury menu, or the gear at the bottom of the sidebar) is a small window with every
+-- installed Fury addon, an Open and a Settings button each, and the sidebar's options.
+--
+-- The key and the sidebar's saved settings live in the small FurysAddonMenu folder that ships
+-- inside every Fury addon; the game loads the folder once, so the key shows once however many
+-- Fury addons are installed. Each addon's copy of this file puts that addon on the shared list
+-- (FurysAddonMenu.entries), so an addon never has to know the names of the others. The newest
+-- copy of this file among the installed addons builds the sidebar and the list.
 ------------------------------------------------------------------------------
 local MENU_GLOBAL = "FurysAddonMenu"
 local MENU_WIDTH, MENU_ROW = 600, 40
-local MENU_HELP = "Type /fury to open this menu, or set a key: Controls > Keybindings > Fury's Addons > \"Open the Fury addons menu\"."
+local MENU_HELP = "Type /fury, or press the key (Controls > Keybindings > Fury's Addons), to show or hide the sidebar. /fury menu opens this window."
+local BAR_NAME = "Fury's Addons"
+-- Sidebar sizes: small (the default, about the size of other sidebars) and big. Icon, gap, grip.
+local BAR_SMALL = { icon = 28, pad = 2, grip = 12 }
+local BAR_BIG = { icon = 40, pad = 5, grip = 12 }
+local BAR_FALLBACK = "EsoUI/Art/MainMenu/menuBar_collections_up.dds"
 
 local shared = rawget(_G, MENU_GLOBAL)
 if not shared then
     shared = { entries = {}, lib = 0 }
     _G[MENU_GLOBAL] = shared
 end
-shared.entries[MENU_NAME] = { name = MENU_NAME, open = MenuOpen, settings = MenuSettings }
+shared.entries[MENU_NAME] = { name = MENU_NAME, open = MenuOpen, settings = MenuSettings, glyph = GLYPH }
+
+-- The sidebar's settings. The FurysAddonMenu folder saves them; without it they last until the
+-- next reload.
+local function BarSaved()
+    if not shared.sv then shared.sv = {} end
+    return shared.sv
+end
+
+local function SortedNames()
+    local names = {}
+    for name in pairs(shared.entries) do names[#names + 1] = name end
+    table.sort(names)
+    return names
+end
 
 local function MenuButton(name, win, text, tip, onClick)
     local button = WINDOW_MANAGER:CreateControlFromVirtual(name, win, "ZO_DefaultButton")
@@ -442,6 +489,157 @@ local function MenuButton(name, win, text, tip, onClick)
     button:SetHandler("OnClicked", onClick)
     T.Tip(button, tip)
     return button
+end
+
+-- Lays the sidebar out as a column (the grip line across the top) or, with `across`, as a row
+-- (the grip line down the left end), with small or big icons.
+local function LayoutBar(across, big)
+    local size = big and BAR_BIG or BAR_SMALL
+    local BAR_ICON, BAR_PAD, BAR_GRIP = size.icon, size.pad, size.grip
+    local bar, step = shared.bar, BAR_ICON + BAR_PAD
+    local count = #shared.barIcons
+    local long, short = BAR_GRIP + (count + 1) * step + BAR_PAD, BAR_ICON + 2 * BAR_PAD
+    shared.barGrip:ClearAnchors()
+    if across then
+        bar:SetDimensions(long, short)
+        shared.barGrip:SetAnchor(TOPLEFT, bar, TOPLEFT, BAR_PAD, BAR_PAD)
+        shared.barGrip:SetAnchor(BOTTOMRIGHT, bar, BOTTOMLEFT, BAR_PAD + 3, -BAR_PAD)
+    else
+        bar:SetDimensions(short, long)
+        shared.barGrip:SetAnchor(TOPLEFT, bar, TOPLEFT, BAR_PAD, BAR_PAD)
+        shared.barGrip:SetAnchor(BOTTOMRIGHT, bar, TOPRIGHT, -BAR_PAD, BAR_PAD + 3)
+    end
+    for i = 1, count + 1 do
+        local icon = shared.barIcons[i] or shared.barGear
+        local edge = icon == shared.barGear and BAR_ICON - 6 or BAR_ICON
+        local at = BAR_GRIP + (i - 1) * step + (BAR_ICON - edge) / 2
+        icon:SetDimensions(edge, edge)
+        icon:ClearAnchors()
+        if across then
+            icon:SetAnchor(LEFT, bar, LEFT, at, 0)
+        else
+            icon:SetAnchor(TOP, bar, TOP, 0, at)
+        end
+    end
+end
+
+-- Puts the saved settings on the sidebar: shown or not, where, which way, movable or locked.
+local function ApplyBar()
+    local bar, saved = shared.bar, BarSaved()
+    if not bar then return end
+    LayoutBar(saved.across == true, saved.big == true)
+    bar:SetMovable(not saved.locked)
+    shared.barFragment:SetHiddenForReason("off", not saved.shown)
+    shared.barFragment:SetHiddenForReason("combat", saved.combat == true and IsUnitInCombat("player"))
+    -- The icons can only be clicked with the cursor out, so the sidebar shows in cursor mode only,
+    -- unless the player asks to see it all the time.
+    if saved.always == true then
+        HUD_SCENE:AddFragment(shared.barFragment)
+    else
+        HUD_SCENE:RemoveFragment(shared.barFragment)
+    end
+end
+
+local function ToggleMenu()   -- set below, the sidebar's gear needs it
+end
+
+local function BuildBar()
+    local saved = BarSaved()
+    local names = SortedNames()
+    local bar = WINDOW_MANAGER:CreateTopLevelWindow("FurysAddonMenuBar")
+    bar:SetHidden(true)
+    bar:SetMouseEnabled(true)
+    bar:SetClampedToScreen(true)
+    if saved.x and saved.y then
+        bar:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, saved.x, saved.y)
+    else
+        bar:SetAnchor(LEFT, GuiRoot, LEFT, 20, 0)
+    end
+    bar:SetHandler("OnMoveStop", function(self)
+        local now = BarSaved()
+        now.x, now.y = self:GetLeft(), self:GetTop()
+    end)
+
+    local bg = WINDOW_MANAGER:CreateControl("$(parent)Bg", bar, CT_BACKDROP)
+    bg:SetAnchorFill(bar)
+    bg:SetEdgeTexture("", 1, 1, 2, 0)
+    bg:SetCenterColor(T.PANEL.r, T.PANEL.g, T.PANEL.b, 0.85)
+    bg:SetEdgeColor(T.EDGE:UnpackRGBA())
+
+    -- The grip: a violet line. It takes no clicks, so a drag there moves the bar.
+    shared.barGrip = T.Rect("$(parent)Grip", bar, T.VIOLET, DL_CONTROLS, 1)
+    shared.barIcons = {}
+
+    for i, name in ipairs(names) do
+        local entry = shared.entries[name]
+        local glyph = entry.glyph or BAR_FALLBACK
+        local icon = WINDOW_MANAGER:CreateControl("$(parent)Icon" .. i, bar, CT_BUTTON)
+        icon:SetNormalTexture(glyph)
+        icon:SetMouseOverTexture((string.gsub(glyph, "_up.dds", "_over.dds")))
+        icon:EnableMouseButton(MOUSE_BUTTON_INDEX_RIGHT, true)
+        icon:SetHandler("OnClicked", function(_, button)
+            if button == MOUSE_BUTTON_INDEX_RIGHT then entry.settings() else entry.open() end
+        end)
+        T.Tip(icon, name .. "\nLeft-click: open. Right-click: settings.")
+        shared.barIcons[i] = icon
+    end
+
+    local gear = WINDOW_MANAGER:CreateControl("$(parent)Gear", bar, CT_BUTTON)
+    gear:SetNormalTexture("/esoui/art/chatwindow/chat_options_up.dds")
+    gear:SetPressedTexture("/esoui/art/chatwindow/chat_options_down.dds")
+    gear:SetMouseOverTexture("/esoui/art/chatwindow/chat_options_over.dds")
+    gear:SetHandler("OnClicked", function() shared.Menu() end)
+    T.Tip(gear, "The Fury addons list and this sidebar's options: lock it in place, a row or a column, big or small icons, hide it in combat, keep it on screen without the cursor, turn it off.\nTo move the sidebar, drag its violet line. /fury shows or hides it.")
+
+    shared.barGear = gear
+    shared.bar = bar
+    shared.barFragment = ZO_HUDFadeSceneFragment:New(bar)
+    HUD_UI_SCENE:AddFragment(shared.barFragment)
+    EVENT_MANAGER:RegisterForEvent("FurysAddonMenuBar", EVENT_PLAYER_COMBAT_STATE, ApplyBar)
+    ApplyBar()
+end
+
+-- Builds the sidebar once, when the first character is in the world and every Fury addon is on
+-- the list.
+local function StartBar()
+    if not shared.bar then BuildBar() end
+end
+
+local function RefreshChecks()
+    if not shared.checks then return end
+    local saved = BarSaved()
+    ZO_CheckButton_SetCheckState(shared.checks.shown, saved.shown == true)
+    ZO_CheckButton_SetCheckState(shared.checks.locked, saved.locked == true)
+    ZO_CheckButton_SetCheckState(shared.checks.combat, saved.combat == true)
+    ZO_CheckButton_SetCheckState(shared.checks.across, saved.across == true)
+    ZO_CheckButton_SetCheckState(shared.checks.big, saved.big == true)
+    ZO_CheckButton_SetCheckState(shared.checks.always, saved.always == true)
+end
+
+local function ToggleBar()
+    StartBar()
+    local saved = BarSaved()
+    saved.shown = not saved.shown
+    ApplyBar()
+    RefreshChecks()
+    if saved.shown then
+        T.ChatAs(BAR_NAME, "Sidebar on. It shows whenever your cursor is out. Left-click an icon to open that addon, right-click for its settings. Drag its violet line to move it. /fury hides it again.")
+    else
+        T.ChatAs(BAR_NAME, "Sidebar off. /fury shows it again; /fury menu opens the list of your Fury addons.")
+    end
+end
+
+local function MenuCheck(name, win, y, text, tip, field)
+    local check = WINDOW_MANAGER:CreateControlFromVirtual(name, win, "ZO_CheckButton")
+    check:SetAnchor(TOPLEFT, win, TOPLEFT, 22, y)
+    ZO_CheckButton_SetLabelText(check, text)
+    ZO_CheckButton_SetToggleFunction(check, function(_, checked)
+        StartBar()
+        BarSaved()[field] = checked
+        ApplyBar()
+    end)
+    T.Tip(check, tip)
+    return check
 end
 
 local function BuildMenu()
@@ -459,7 +657,7 @@ local function BuildMenu()
 
     local title = WINDOW_MANAGER:CreateControl("$(parent)Title", win, CT_LABEL)
     title:SetAnchor(TOP, win, TOP, 0, 10)
-    title:SetText("Fury's Addons")
+    title:SetText(BAR_NAME)
 
     local close = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)Close", win, "ZO_CloseButton")
     close:SetAnchor(TOPRIGHT, win, TOPRIGHT, -12, 12)
@@ -468,9 +666,7 @@ local function BuildMenu()
 
     T.Window(win, { center = true })
 
-    local names = {}
-    for name in pairs(shared.entries) do names[#names + 1] = name end
-    table.sort(names)
+    local names = SortedNames()
     for i, name in ipairs(names) do
         local entry = shared.entries[name]
         local y = 62 + (i - 1) * MENU_ROW
@@ -491,30 +687,122 @@ local function BuildMenu()
         open:SetAnchor(RIGHT, settings, LEFT, -8, 0)
     end
 
+    local y = 62 + #names * MENU_ROW + 10
+    shared.checks = {
+        shown = MenuCheck("$(parent)BarShown", win, y, "Show the sidebar",
+            "A slim bar of icons, one per Fury addon, that shows whenever your cursor is out. Left-click an icon to open that addon, right-click for its settings. Starts turned off. /fury and the key do the same as this box.", "shown"),
+        locked = MenuCheck("$(parent)BarLocked", win, y + 84, "Lock the sidebar in place",
+            "With this on, the sidebar can't be dragged. Off: drag its violet line to move it.", "locked"),
+        combat = MenuCheck("$(parent)BarCombat", win, y + 112, "Hide the sidebar in combat",
+            "With this on, the sidebar is hidden while you are in combat and comes back afterwards.", "combat"),
+        across = MenuCheck("$(parent)BarAcross", win, y + 28, "Horizontal sidebar (a row of icons)",
+            "With this on, the icons sit side by side in a row. Off: they are stacked in a column.", "across"),
+        big = MenuCheck("$(parent)BarBig", win, y + 56, "Bigger sidebar icons",
+            "With this on, the sidebar's icons are bigger and further apart. Off: a slim sidebar with small icons.", "big"),
+        always = MenuCheck("$(parent)BarAlways", win, y + 140, "Show the sidebar without the cursor too",
+            "Off: the sidebar shows only while your cursor is out, which is when you can click it. With this on, it also stays on screen while you play without the cursor.", "always"),
+    }
+
     local help = WINDOW_MANAGER:CreateControl("$(parent)Help", win, CT_LABEL)
     help:SetFont("ZoFontGameSmall")
     Paint(help, T.SUB)
     help:SetWidth(MENU_WIDTH - 40)
     help:SetText(MENU_HELP)
-    help:SetAnchor(TOPLEFT, win, TOPLEFT, 20, 62 + #names * MENU_ROW + 8)
+    help:SetAnchor(TOPLEFT, win, TOPLEFT, 20, y + 174)
 
-    win:SetDimensions(MENU_WIDTH, 62 + #names * MENU_ROW + 64)
+    win:SetDimensions(MENU_WIDTH, y + 174 + 52)
     SCENE_MANAGER:RegisterTopLevel(win, false)
     return win
 end
 
-local function ToggleMenu()
+ToggleMenu = function()
     if not shared.window then shared.window = BuildMenu() end
     if shared.window:IsHidden() then
+        RefreshChecks()
         SCENE_MANAGER:ShowTopLevel(shared.window)
     else
         SCENE_MANAGER:HideTopLevel(shared.window)
     end
 end
 
--- The newest copy of this file among the installed addons runs the menu.
+-- The newest copy of this file among the installed addons runs the sidebar and the list.
 if shared.lib < T.LIB then
     shared.lib = T.LIB
-    shared.Toggle = ToggleMenu
+    shared.Toggle = ToggleBar
+    shared.Menu = ToggleMenu
+    shared.Start = StartBar
 end
-SLASH_COMMANDS["/fury"] = function() shared.Toggle() end
+SLASH_COMMANDS["/fury"] = function(text)
+    if zo_strlower(zo_strtrim(text or "")) == "menu" then shared.Menu() else shared.Toggle() end
+end
+
+local BAR_EVENT = CONFIRM_PREFIX .. "_BAR"
+EVENT_MANAGER:RegisterForEvent(BAR_EVENT, EVENT_PLAYER_ACTIVATED, function()
+    EVENT_MANAGER:UnregisterForEvent(BAR_EVENT, EVENT_PLAYER_ACTIVATED)
+    shared.Start()
+end)
+
+------------------------------------------------------------------------------
+-- The other Fury addons in a window's title bar: a row of small icons, one per other Fury addon
+-- you have installed, so any of them is one click away. Left-click opens that addon, right-click
+-- its settings. It is built
+-- the first time the window shows, when every installed Fury addon is on the list.
+------------------------------------------------------------------------------
+local TITLE_ICON, TITLE_GAP = 30, 2
+
+-- The row sits on the left, between the window's name and its version:
+--   [glyph] Title  [icons]  v1.2.3  [Start here]  . . .  [search]  [gear]  [X]
+-- `rightOf` is the leftmost control on the right side of the title bar and `reserve` is extra
+-- width to keep free left of it (for controls that only show on some tabs). Icons that would
+-- push Start here into that space are left out. `start` is the Start here button, when the
+-- window has one that T.StartButton did not make.
+function T.TitleIcons(win, rightOf, start, reserve)
+    local built = false
+    local function Build()
+        if built then return end
+        built = true
+        local info = win.furyTitle
+        if not info then return end
+        local others = {}
+        for _, name in ipairs(SortedNames()) do
+            if name ~= MENU_NAME then others[#others + 1] = name end
+        end
+        start = start or win:GetNamedChild("StartHere")
+        local left = start or info.label
+        local room = rightOf:GetLeft() - (reserve or 0) - left:GetRight() - 24
+        local count = math.min(#others, math.floor(room / (TITLE_ICON + TITLE_GAP)))
+        if count < 1 then return end
+
+        local previous = info.label
+        for i = 1, count do
+            local name = others[i]
+            local entry = shared.entries[name]
+            local glyph = entry.glyph or BAR_FALLBACK
+            local icon = WINDOW_MANAGER:CreateControl(win:GetName() .. "FuryIcon" .. i, win, CT_BUTTON)
+            icon:SetDimensions(TITLE_ICON, TITLE_ICON)
+            icon:SetAnchor(LEFT, previous, RIGHT, i == 1 and 10 or TITLE_GAP, 0)
+            icon:SetDrawLayer(DL_CONTROLS)
+            icon:SetDrawLevel(1)
+            icon:SetNormalTexture(glyph)
+            icon:SetMouseOverTexture((string.gsub(glyph, "_up.dds", "_over.dds")))
+            icon:EnableMouseButton(MOUSE_BUTTON_INDEX_RIGHT, true)
+            icon:SetHandler("OnClicked", function(_, button)
+                if button == MOUSE_BUTTON_INDEX_RIGHT then entry.settings() else entry.open() end
+            end)
+            T.Tip(icon, name .. "\nLeft-click: open. Right-click: settings.")
+            previous = icon
+        end
+
+        -- The version moves to the right of the icons, still on the title's baseline; Start
+        -- here follows it.
+        local version = info.versionLabel
+        version:ClearAnchors()
+        version:SetAnchor(BOTTOMLEFT, previous, BOTTOMRIGHT, 8, -3)
+        if start then
+            start:ClearAnchors()
+            start:SetAnchor(LEFT, info.label, RIGHT, 10 + count * (TITLE_ICON + TITLE_GAP) - TITLE_GAP + T.StartOffset(win), 0)
+        end
+    end
+    ZO_PreHookHandler(win, "OnEffectivelyShown", Build)
+    if not win:IsHidden() then Build() end
+end
