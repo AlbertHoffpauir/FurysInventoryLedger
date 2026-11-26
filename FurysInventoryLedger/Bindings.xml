@@ -7,9 +7,6 @@
             <Action name="FURYSINVENTORYLEDGER_COPY">
                 <Down>FurysInventoryLedger.ToggleCopy()</Down>
             </Action>
-            <Action name="FURYSINVENTORYLEDGER_FURY_MENU">
-                <Down>FurysAddonMenu.Toggle()</Down>
-            </Action>
         </Category>
     </Layer>
 </Bindings>

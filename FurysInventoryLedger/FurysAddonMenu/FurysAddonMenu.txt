@@ -1,0 +1,10 @@
+## Title: Fury's Addons Menu
+## Description: The one key for the Fury addons menu (Controls > Keybindings > Fury's Addons). Ships inside every Fury addon; the game loads it once.
+## Author: Furyous
+## Version: 1.0.0
+## AddOnVersion: 1
+## IsLibrary: true
+## APIVersion: 101051 101052
+
+FurysAddonMenu.lua
+Bindings.xml

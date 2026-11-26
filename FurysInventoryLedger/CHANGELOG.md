@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.8
+- **One key for the Fury addons menu.** "Open the Fury addons menu" now shows once in Controls > Keybindings, under Fury's Addons, instead of once under every Fury addon. If you had set a key for it, set it again there.
+- Fury's Guild Management Toolset is now called **Fury's Guild Toolset**; More from Fury and the Fury addons menu show the new name.
+
 ## 1.6.7
 - **More from Fury** now lists Fury's Quality of Life, a new addon of small comforts: Select all on the deconstruct screens, a fishing bite alert with the right bait, a queue alert and a lock for everything you wear.
 

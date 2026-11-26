@@ -6,7 +6,7 @@ An Elder Scrolls Online addon: every item you own in one list. Every character's
 
 ## Downloads
 
-- **The addon:** get it from ESOUI or Minion. The same files are in [`FurysInventoryLedger/`](FurysInventoryLedger/) here, and as [FurysInventoryLedger-1.6.7.zip](https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-1.6.7.zip).
+- **The addon:** get it from ESOUI or Minion. The same files are in [`FurysInventoryLedger/`](FurysInventoryLedger/) here, and as [FurysInventoryLedger-1.6.8.zip](https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-1.6.8.zip).
 - **Windows Tools** (optional): Excel export. **[Download FurysInventoryLedger-WindowsTools-1.5.0.zip](https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-WindowsTools-1.5.0.zip)**. Unzip it into any folder, for example Documents\Elder Scrolls Online. Source: [`WindowsTools/`](WindowsTools/), and [README.txt](WindowsTools/README.txt) says what every file does.
 
 The tools are plain-text scripts (batch, PowerShell). They only read the addon's saved data file on your PC, write one CSV to your Desktop, and never connect to the internet.
@@ -21,7 +21,7 @@ The tools are plain-text scripts (batch, PowerShell). They only read the addon's
 
 ## More from Fury
 
-- [Fury's Guild Management Toolset](https://www.esoui.com/downloads/info5063.html): an officer's toolkit: bank alerts, member and inactivity reports, trader week totals, raffles, event sign-ups and recruiting.
+- [Fury's Guild Toolset](https://www.esoui.com/downloads/info5063.html): an officer's toolkit: bank alerts, member and inactivity reports, trader week totals, raffles, event sign-ups and recruiting.
 - [Fury's Character Tracker](https://www.esoui.com/downloads/info5078.html): every character on one board: skill lines, crafting, research, daily writs, wallet and gear.
 - [Fury's Account Sync](https://www.esoui.com/downloads/info5106.html): make your other accounts on this PC match your main one: settings, keybinds, addon settings and builds.
 - [Fury's Quality of Life](https://www.esoui.com/downloads/info5115.html): small comforts for everyday play: Select all when you deconstruct, a fishing bite alert with the right bait, a queue alert and a lock for everything you wear.

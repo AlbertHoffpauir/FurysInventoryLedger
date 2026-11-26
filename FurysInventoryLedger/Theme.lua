@@ -1,7 +1,7 @@
 -- Fury Night: the shared library of Fury's addons. Look (colors, fonts, window header, tabs,
 -- Start here page), chat lines, the welcome line, confirm pop-ups, "More from Fury" and the
 -- Fury addons menu (/fury). The same file ships in every Fury addon, so they all look and behave
--- the same. Only the seven lines below differ: it hangs off that addon's own table, so no addon
+-- the same. Only the six lines below differ: it hangs off that addon's own table, so no addon
 -- depends on another one being installed. Its one global, FurysAddonMenu, is the list the
 -- installed Fury addons put themselves on for the menu.
 
@@ -9,7 +9,6 @@ local A = FurysInventoryLedger
 local GLYPH = "EsoUI/Art/MainMenu/menuBar_inventory_up.dds"
 local CHAT = "Inventory Ledger"   -- the name in front of this addon's chat lines
 local MENU_NAME = "Fury's Inventory Ledger"   -- this addon's line in the Fury addons menu
-local MENU_KEY = "FURYSINVENTORYLEDGER_FURY_MENU"   -- the menu's key in this addon's Bindings.xml
 local function MenuOpen() A.OpenSummary() end
 local function MenuSettings() A.OpenSettings() end
 
@@ -51,7 +50,7 @@ end
 -- Which version of this shared file an addon carries. Raise it with every change to the file,
 -- then copy the file into every addon.
 ------------------------------------------------------------------------------
-T.LIB = 6
+T.LIB = 7
 
 ------------------------------------------------------------------------------
 -- Chat: every line an addon prints starts with its name in violet, "[Guild Toolset] text".
@@ -317,7 +316,7 @@ T.MORE_TITLE = "More from Fury"
 T.MORE_FOOT = "All free on ESOUI and in Minion: search for \"Fury's\"."
 
 local MORE = {
-    { global = "FurysGuildToolset", name = "Fury's Guild Management Toolset", short = "Guild Toolset",
+    { global = "FurysGuildToolset", name = "Fury's Guild Toolset", short = "Guild Toolset",
       about = "an officer's toolkit: bank alerts, member and inactivity reports, trader week totals, raffles, event sign-ups and recruiting.",
       url = "https://www.esoui.com/downloads/info5063.html" },
     { global = "FurysCharacterTracker", name = "Fury's Character Tracker", short = "Character Tracker",
@@ -417,7 +416,9 @@ end
 ------------------------------------------------------------------------------
 -- The Fury addons menu: one small window that lists every Fury addon you have installed, each
 -- with an Open and a Settings button. /fury opens it, and so does the key "Open the Fury addons
--- menu" that every Fury addon has under its name in Controls > Keybindings.
+-- menu" under Fury's Addons in Controls > Keybindings. That one key lives in the small
+-- FurysAddonMenu folder that ships inside every Fury addon; the game loads the folder once, so
+-- the key shows once however many Fury addons are installed.
 --
 -- Each addon's copy of this file puts that addon on the shared list (FurysAddonMenu.entries), so
 -- an addon never has to know the names of the others. The window is built once, the first time
@@ -425,7 +426,7 @@ end
 ------------------------------------------------------------------------------
 local MENU_GLOBAL = "FurysAddonMenu"
 local MENU_WIDTH, MENU_ROW = 600, 40
-local MENU_HELP = "Type /fury to open this menu, or set a key: Controls > Keybindings, under any Fury addon, \"Open the Fury addons menu\"."
+local MENU_HELP = "Type /fury to open this menu, or set a key: Controls > Keybindings > Fury's Addons > \"Open the Fury addons menu\"."
 
 local shared = rawget(_G, MENU_GLOBAL)
 if not shared then
@@ -433,7 +434,6 @@ if not shared then
     _G[MENU_GLOBAL] = shared
 end
 shared.entries[MENU_NAME] = { name = MENU_NAME, open = MenuOpen, settings = MenuSettings }
-ZO_CreateStringId("SI_BINDING_NAME_" .. MENU_KEY, "Open the Fury addons menu")
 
 local function MenuButton(name, win, text, tip, onClick)
     local button = WINDOW_MANAGER:CreateControlFromVirtual(name, win, "ZO_DefaultButton")

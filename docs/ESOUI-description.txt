@@ -9,7 +9,7 @@
 
 [CENTER][SIZE="6"][FONT="Georgia"][COLOR="#A08CFF"][B]Fury's Inventory Ledger[/B][/COLOR][/FONT][/SIZE]
 [SIZE="3"][COLOR="#5CC2FF"][I]Everything you own, everywhere you keep it, in one ledger.[/I][/COLOR][/SIZE][/CENTER]
-[CENTER][SIZE="1"][COLOR="#B4B0D8"]FURY'S ADDONS[/COLOR]   [URL="https://www.esoui.com/downloads/info5063.html"]Guild Management Toolset[/URL]   |   [URL="https://www.esoui.com/downloads/info5078.html"]Character Tracker[/URL]   |   [COLOR="#A08CFF"][B]Inventory Ledger[/B][/COLOR]   |   [URL="https://www.esoui.com/downloads/info5106.html"]Account Sync[/URL]   |   [URL="https://www.esoui.com/downloads/info5115.html"]Quality of Life[/URL][/SIZE][/CENTER]
+[CENTER][SIZE="1"][COLOR="#B4B0D8"]FURY'S ADDONS[/COLOR]   [URL="https://www.esoui.com/downloads/info5063.html"]Guild Toolset[/URL]   |   [URL="https://www.esoui.com/downloads/info5078.html"]Character Tracker[/URL]   |   [COLOR="#A08CFF"][B]Inventory Ledger[/B][/COLOR]   |   [URL="https://www.esoui.com/downloads/info5106.html"]Account Sync[/URL]   |   [URL="https://www.esoui.com/downloads/info5115.html"]Quality of Life[/URL][/SIZE][/CENTER]
 
 [B]Know what you have and where it is.[/B] Every character's bags and gear, the bank, the craft bag, house storage, the Furniture Vault, furniture placed in your houses, and your currencies. See it all on a summary page with running currency totals, copy it in game, or export it to Excel.
 [QUOTE][SIZE="3"][COLOR="#5CC2FF"][B]Get your data out of the game[/B][/COLOR][/SIZE]
@@ -127,7 +127,7 @@ Item names, qualities and types come from the game in your client's language. Co
 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]More from Fury[/B][/COLOR][/FONT][/SIZE]
 [LIST]
-[*][URL="https://www.esoui.com/downloads/info5063.html"][B]Fury's Guild Management Toolset[/B][/URL]: an officer's toolkit: bank alerts, member and inactivity reports, trader week totals, raffles, event sign-ups and recruiting.
+[*][URL="https://www.esoui.com/downloads/info5063.html"][B]Fury's Guild Toolset[/B][/URL]: an officer's toolkit: bank alerts, member and inactivity reports, trader week totals, raffles, event sign-ups and recruiting.
 [*][URL="https://www.esoui.com/downloads/info5078.html"][B]Fury's Character Tracker[/B][/URL]: every character on one board: skill lines, crafting, research, daily writs, wallet and gear.
 [*][URL="https://www.esoui.com/downloads/info5106.html"][B]Fury's Account Sync[/B][/URL]: make your other accounts on this PC match your main one: settings, keybinds, addon settings and builds.
 [*][URL="https://www.esoui.com/downloads/info5115.html"][B]Fury's Quality of Life[/B][/URL]: small comforts for everyday play: Select all when you deconstruct, a fishing bite alert with the right bait, a queue alert and a lock for everything you wear.
@@ -138,4 +138,4 @@ All free here on ESOUI and in Minion.
 Bug reports and ideas are welcome in the comments.
 Source code: [URL="https://github.com/AlbertHoffpauir/FurysInventoryLedger"]GitHub[/URL]
 
-[CENTER][SIZE="1"][COLOR="#B4B0D8"]FURY'S ADDONS[/COLOR]   [URL="https://www.esoui.com/downloads/info5063.html"]Guild Management Toolset[/URL]   |   [URL="https://www.esoui.com/downloads/info5078.html"]Character Tracker[/URL]   |   [COLOR="#A08CFF"][B]Inventory Ledger[/B][/COLOR]   |   [URL="https://www.esoui.com/downloads/info5106.html"]Account Sync[/URL]   |   [URL="https://www.esoui.com/downloads/info5115.html"]Quality of Life[/URL][/SIZE][/CENTER]
+[CENTER][SIZE="1"][COLOR="#B4B0D8"]FURY'S ADDONS[/COLOR]   [URL="https://www.esoui.com/downloads/info5063.html"]Guild Toolset[/URL]   |   [URL="https://www.esoui.com/downloads/info5078.html"]Character Tracker[/URL]   |   [COLOR="#A08CFF"][B]Inventory Ledger[/B][/COLOR]   |   [URL="https://www.esoui.com/downloads/info5106.html"]Account Sync[/URL]   |   [URL="https://www.esoui.com/downloads/info5115.html"]Quality of Life[/URL][/SIZE][/CENTER]
