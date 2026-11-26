@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.6.7
+- **More from Fury** now lists Fury's Quality of Life, a new addon of small comforts: Select all on the deconstruct screens, a fishing bite alert with the right bait, a queue alert and a lock for everything you wear.
+
+## 1.6.6
+- **The Fury addons menu.** Type `/fury`, or set the key "Open the Fury addons menu" (under this addon in Controls > Keybindings), for a small window that lists every Fury addon you have installed, each with an Open and a Settings button.
+
+## 1.6.5
+- The addon page now says what the addon really does in chat: one welcome line on a new install, pointing to `/ledger`, and nothing else unless you ask. No change in the game.
+
 ## 1.6.4
 - **One shared library file.** Chat lines, the welcome line and confirm pop-ups now come from the same file every Fury addon carries, next to the look, Start here and More from Fury, so all of them stay identical. Nothing changes in how the addon works, and it still needs no other addon.
 

@@ -1,12 +1,17 @@
 -- Fury Night: the shared library of Fury's addons. Look (colors, fonts, window header, tabs,
--- Start here page), chat lines, the welcome line, confirm pop-ups and "More from Fury".
--- The same file ships in every Fury addon, so they all look and behave the same. Only the three
--- lines below differ: it hangs off that addon's own table and adds no globals of its own, so no
--- addon depends on another one being installed.
+-- Start here page), chat lines, the welcome line, confirm pop-ups, "More from Fury" and the
+-- Fury addons menu (/fury). The same file ships in every Fury addon, so they all look and behave
+-- the same. Only the seven lines below differ: it hangs off that addon's own table, so no addon
+-- depends on another one being installed. Its one global, FurysAddonMenu, is the list the
+-- installed Fury addons put themselves on for the menu.
 
 local A = FurysInventoryLedger
 local GLYPH = "EsoUI/Art/MainMenu/menuBar_inventory_up.dds"
 local CHAT = "Inventory Ledger"   -- the name in front of this addon's chat lines
+local MENU_NAME = "Fury's Inventory Ledger"   -- this addon's line in the Fury addons menu
+local MENU_KEY = "FURYSINVENTORYLEDGER_FURY_MENU"   -- the menu's key in this addon's Bindings.xml
+local function MenuOpen() A.OpenSummary() end
+local function MenuSettings() A.OpenSettings() end
 
 local T = {}
 A.Theme = T
@@ -46,7 +51,7 @@ end
 -- Which version of this shared file an addon carries. Raise it with every change to the file,
 -- then copy the file into every addon.
 ------------------------------------------------------------------------------
-T.LIB = 4
+T.LIB = 6
 
 ------------------------------------------------------------------------------
 -- Chat: every line an addon prints starts with its name in violet, "[Guild Toolset] text".
@@ -324,6 +329,9 @@ local MORE = {
     { global = "FurysAccountSync", name = "Fury's Account Sync", short = "Account Sync",
       about = "make your other accounts on this PC match your main one: settings, keybinds, addon settings and builds.",
       url = "https://www.esoui.com/downloads/info5106.html" },
+    { global = "FurysQualityOfLife", name = "Fury's Quality of Life", short = "Quality of Life",
+      about = "small comforts for everyday play: Select all when you deconstruct, a fishing bite alert with the right bait, a queue alert and a lock for everything you wear.",
+      url = "https://www.esoui.com/downloads/info5115.html" },
 }
 
 -- The other addons: { name, short, about, url } each.
@@ -405,3 +413,108 @@ function T.StartPage(win, intro, sections)
     end
     SCENE_MANAGER:ShowTopLevel(win)
 end
+
+------------------------------------------------------------------------------
+-- The Fury addons menu: one small window that lists every Fury addon you have installed, each
+-- with an Open and a Settings button. /fury opens it, and so does the key "Open the Fury addons
+-- menu" that every Fury addon has under its name in Controls > Keybindings.
+--
+-- Each addon's copy of this file puts that addon on the shared list (FurysAddonMenu.entries), so
+-- an addon never has to know the names of the others. The window is built once, the first time
+-- it is opened, by the newest copy of this file among the installed addons.
+------------------------------------------------------------------------------
+local MENU_GLOBAL = "FurysAddonMenu"
+local MENU_WIDTH, MENU_ROW = 600, 40
+local MENU_HELP = "Type /fury to open this menu, or set a key: Controls > Keybindings, under any Fury addon, \"Open the Fury addons menu\"."
+
+local shared = rawget(_G, MENU_GLOBAL)
+if not shared then
+    shared = { entries = {}, lib = 0 }
+    _G[MENU_GLOBAL] = shared
+end
+shared.entries[MENU_NAME] = { name = MENU_NAME, open = MenuOpen, settings = MenuSettings }
+ZO_CreateStringId("SI_BINDING_NAME_" .. MENU_KEY, "Open the Fury addons menu")
+
+local function MenuButton(name, win, text, tip, onClick)
+    local button = WINDOW_MANAGER:CreateControlFromVirtual(name, win, "ZO_DefaultButton")
+    button:SetDimensions(110, 28)
+    button:SetText(text)
+    button:SetHandler("OnClicked", onClick)
+    T.Tip(button, tip)
+    return button
+end
+
+local function BuildMenu()
+    local win = WINDOW_MANAGER:CreateTopLevelWindow("FurysAddonMenuWindow")
+    win:SetHidden(true)
+    win:SetMouseEnabled(true)
+    win:SetMovable(true)
+    win:SetClampedToScreen(true)
+    win:SetDrawTier(DT_HIGH)
+    win:SetAnchor(CENTER, GuiRoot, CENTER, 0, 0)
+
+    local bg = WINDOW_MANAGER:CreateControl("$(parent)Bg", win, CT_BACKDROP)
+    bg:SetAnchorFill(win)
+    bg:SetEdgeTexture("", 1, 1, 2, 0)
+
+    local title = WINDOW_MANAGER:CreateControl("$(parent)Title", win, CT_LABEL)
+    title:SetAnchor(TOP, win, TOP, 0, 10)
+    title:SetText("Fury's Addons")
+
+    local close = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)Close", win, "ZO_CloseButton")
+    close:SetAnchor(TOPRIGHT, win, TOPRIGHT, -12, 12)
+    close:SetHandler("OnClicked", function() SCENE_MANAGER:HideTopLevel(win) end)
+    T.CloseTip(close)
+
+    T.Window(win, { center = true })
+
+    local names = {}
+    for name in pairs(shared.entries) do names[#names + 1] = name end
+    table.sort(names)
+    for i, name in ipairs(names) do
+        local entry = shared.entries[name]
+        local y = 62 + (i - 1) * MENU_ROW
+        local label = WINDOW_MANAGER:CreateControl("$(parent)Name" .. i, win, CT_LABEL)
+        label:SetFont("ZoFontWinH4")
+        Paint(label, T.TEXT)
+        label:SetText(name)
+        label:SetAnchor(TOPLEFT, win, TOPLEFT, 20, y + 3)
+        local settings = MenuButton("$(parent)Settings" .. i, win, "Settings", "Opens the settings of " .. name .. ".", function()
+            SCENE_MANAGER:HideTopLevel(win)
+            entry.settings()
+        end)
+        settings:SetAnchor(TOPRIGHT, win, TOPRIGHT, -20, y)
+        local open = MenuButton("$(parent)Open" .. i, win, "Open", "Opens the window of " .. name .. ".", function()
+            SCENE_MANAGER:HideTopLevel(win)
+            entry.open()
+        end)
+        open:SetAnchor(RIGHT, settings, LEFT, -8, 0)
+    end
+
+    local help = WINDOW_MANAGER:CreateControl("$(parent)Help", win, CT_LABEL)
+    help:SetFont("ZoFontGameSmall")
+    Paint(help, T.SUB)
+    help:SetWidth(MENU_WIDTH - 40)
+    help:SetText(MENU_HELP)
+    help:SetAnchor(TOPLEFT, win, TOPLEFT, 20, 62 + #names * MENU_ROW + 8)
+
+    win:SetDimensions(MENU_WIDTH, 62 + #names * MENU_ROW + 64)
+    SCENE_MANAGER:RegisterTopLevel(win, false)
+    return win
+end
+
+local function ToggleMenu()
+    if not shared.window then shared.window = BuildMenu() end
+    if shared.window:IsHidden() then
+        SCENE_MANAGER:ShowTopLevel(shared.window)
+    else
+        SCENE_MANAGER:HideTopLevel(shared.window)
+    end
+end
+
+-- The newest copy of this file among the installed addons runs the menu.
+if shared.lib < T.LIB then
+    shared.lib = T.LIB
+    shared.Toggle = ToggleMenu
+end
+SLASH_COMMANDS["/fury"] = function() shared.Toggle() end
