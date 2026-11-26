@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.6.4
+- **One shared library file.** Chat lines, the welcome line and confirm pop-ups now come from the same file every Fury addon carries, next to the look, Start here and More from Fury, so all of them stay identical. Nothing changes in how the addon works, and it still needs no other addon.
+
 ## 1.6.3
 - **More from Fury.** The Start here page and the settings page now end with a short list of my other addons, with a button in the settings that opens each one's ESOUI page (the game asks first). No chat lines, no pop-ups.
 

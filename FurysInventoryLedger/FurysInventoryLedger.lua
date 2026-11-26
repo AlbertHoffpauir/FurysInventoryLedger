@@ -7,7 +7,7 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.6.3"
+FIL.version = "1.6.4"
 -- The Windows tools (Excel export) can't ship in the ESOUI zip; this page has the download.
 FIL.toolsUrl = "https://github.com/AlbertHoffpauir/FurysInventoryLedger#downloads"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
@@ -25,11 +25,11 @@ local HOUSE_DELAY_MS = 4000      -- give placed furniture time to load after zon
 
 local TAG = "|cA08CFF"   -- Fury Night violet (Theme.lua)
 local function Msg(text, ...)
-    CHAT_ROUTER:AddSystemMessage(TAG .. "[Inventory Ledger]|r " .. zo_strformat(text, ...))
+    FIL.Theme.Chat(zo_strformat(text, ...))   -- 1.6.4: the shared chat line (Theme.lua)
 end
 -- A line of chat help: no zo_strformat, so "<words>" and "|" style text shows as typed.
 local function Help(text)
-    CHAT_ROUTER:AddSystemMessage(TAG .. "[Inventory Ledger]|r " .. text)
+    FIL.Theme.Chat(text)
 end
 
 local SV         -- whole saved-variable table
@@ -390,9 +390,8 @@ local function OnPlayerActivated()
         firstActivation = false
         ScanEverythingReadable()
         -- 1.6.2: one line on a new install, like every Fury addon.
-        if FIL.newInstall and not SV.welcomeShown then
-            SV.welcomeShown = true
-            Msg("Welcome! Type /ledger for the summary of everything you own; its Start here button explains it in one page. Everything starts turned off.")
+        if FIL.newInstall then
+            FIL.Theme.Welcome(SV, "welcomeShown", "Welcome! Type /ledger for the summary of everything you own; its Start here button explains it in one page. Everything starts turned off.")
         end
     end
     if GetCurrentZoneHouseId() ~= 0 and IsOwnerOfCurrentHouse() then
@@ -534,6 +533,10 @@ local function OnDeactivated()
     dirty = false
 end
 
+local RELOAD_TEXT = "<<1>> rows are ready for Excel. The game only writes them to your PC when the interface reloads or you log out.\n\nReload the interface now? You get a short loading screen. After it, run ExportToExcel.cmd from the Windows tools."
+local function ReloadNow() ReloadUI("ingame") end
+local function ReloadLater() Msg("The Excel list will be written the next time you log out or reload.") end
+
 -- Builds the list for the Windows tools now, then offers to reload so the game writes it to disk.
 function FIL.PrepareExport()
     FlushPending()
@@ -541,17 +544,9 @@ function FIL.PrepareExport()
     SaveExport(rows)
     exportPrepared = true
     dirty = false
-    ZO_Dialogs_ShowDialog("FURYSINVENTORYLEDGER_RELOAD", nil, { mainTextParams = { ZO_CommaDelimitNumber(#rows) } })
+    -- 1.6.4: the pop-up is the shared one (Theme.lua), the same in every Fury addon.
+    FIL.Theme.Confirm("Fury's Inventory Ledger", zo_strformat(RELOAD_TEXT, ZO_CommaDelimitNumber(#rows)), "Reload now", ReloadNow, ReloadLater)
 end
-
-ZO_Dialogs_RegisterCustomDialog("FURYSINVENTORYLEDGER_RELOAD", {
-    title = { text = "Fury's Inventory Ledger" },
-    mainText = { text = "<<1>> rows are ready for Excel. The game only writes them to your PC when the interface reloads or you log out.\n\nReload the interface now? You get a short loading screen. After it, run ExportToExcel.cmd from the Windows tools." },
-    buttons = {
-        { text = "Reload now", callback = function() ReloadUI("ingame") end },
-        { text = SI_DIALOG_CANCEL, callback = function() Msg("The Excel list will be written the next time you log out or reload.") end },
-    },
-})
 
 local function CsvField(s)
     if s:find('[,"]') then return '"' .. s:gsub('"', '""') .. '"' end

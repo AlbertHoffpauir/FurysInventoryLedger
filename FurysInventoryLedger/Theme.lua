@@ -1,9 +1,12 @@
--- Fury Night: the shared look for Fury's addons.
--- The same file ships in each addon; only the first two lines differ, so it hangs off that
--- addon's own table and adds no globals of its own.
+-- Fury Night: the shared library of Fury's addons. Look (colors, fonts, window header, tabs,
+-- Start here page), chat lines, the welcome line, confirm pop-ups and "More from Fury".
+-- The same file ships in every Fury addon, so they all look and behave the same. Only the three
+-- lines below differ: it hangs off that addon's own table and adds no globals of its own, so no
+-- addon depends on another one being installed.
 
 local A = FurysInventoryLedger
 local GLYPH = "EsoUI/Art/MainMenu/menuBar_inventory_up.dds"
+local CHAT = "Inventory Ledger"   -- the name in front of this addon's chat lines
 
 local T = {}
 A.Theme = T
@@ -37,6 +40,72 @@ for _, key in ipairs({ "VOID", "PANEL", "STRIPE", "HOVER", "SELECT", "EDGE", "GL
                        "TEXT", "SUB", "MUTED", "GOOD", "WARN", "ORANGE", "BAD", "GOLD" }) do
     local r, g, b = T[key]:UnpackRGB()
     T.RGB[key] = { r, g, b }
+end
+
+------------------------------------------------------------------------------
+-- Which version of this shared file an addon carries. Raise it with every change to the file,
+-- then copy the file into every addon.
+------------------------------------------------------------------------------
+T.LIB = 4
+
+------------------------------------------------------------------------------
+-- Chat: every line an addon prints starts with its name in violet, "[Guild Toolset] text".
+------------------------------------------------------------------------------
+-- A line under another name (the Guild Crier inside the Guild Toolset).
+function T.ChatAs(name, text)
+    CHAT_ROUTER:AddSystemMessage(T.TAG .. "[" .. name .. "]|r " .. text)
+end
+
+function T.Chat(text)
+    T.ChatAs(CHAT, text)
+end
+
+-- The one-time welcome line. `saved` is the addon's saved table and `field` the flag in it that
+-- remembers the line was shown. Returns true the one time it prints.
+function T.Welcome(saved, field, text)
+    if saved[field] then return false end
+    saved[field] = true
+    T.Chat(text)
+    return true
+end
+
+------------------------------------------------------------------------------
+-- Confirm pop-up: a title, a text, a button that does it and Cancel. Nothing that reloads the
+-- UI, logs out or can't be undone runs without one. `yes` is the text on the first button
+-- (default "Confirm"); onNo is optional and runs on Cancel.
+------------------------------------------------------------------------------
+local confirmNames, confirmCount = {}, 0
+local CONFIRM_PREFIX = "FURY_" .. string.upper((string.gsub(CHAT, " ", ""))) .. "_CONFIRM"
+
+local function ConfirmYes(dialog)
+    dialog.data.onYes()
+end
+local function ConfirmNo(dialog)
+    if dialog.data.onNo then dialog.data.onNo() end
+end
+
+function T.Confirm(title, text, yes, onYes, onNo)
+    yes = yes or GetString(SI_DIALOG_CONFIRM)
+    local name = confirmNames[yes]
+    if not name then
+        -- one dialog per button text, made the first time it is needed
+        confirmCount = confirmCount + 1
+        name = CONFIRM_PREFIX .. confirmCount
+        confirmNames[yes] = name
+        ZO_Dialogs_RegisterCustomDialog(name, {
+            gamepadInfo = { dialogType = GAMEPAD_DIALOGS.BASIC },
+            title = { text = "<<1>>" },
+            mainText = { text = "<<1>>" },
+            buttons = {
+                { text = yes, callback = ConfirmYes },
+                { text = SI_DIALOG_CANCEL, callback = ConfirmNo },
+            },
+        })
+    end
+    ZO_Dialogs_ShowDialog(name, { onYes = onYes, onNo = onNo }, {
+        titleParams = { title },
+        mainTextParams = { text },
+    })
 end
 
 ------------------------------------------------------------------------------
