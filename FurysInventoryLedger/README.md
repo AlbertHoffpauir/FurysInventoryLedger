@@ -2,13 +2,14 @@
 
 **AI disclosure:** This addon's code was written with the assistance of an AI coding assistant (Claude by Anthropic), working from my designs and instructions. I test every release in game on my own characters before it goes up, and I maintain it. Please report any problem in the comments.
 
+> **New:** this addon now requires [Fury's Addons Menu](https://www.esoui.com/downloads/info5126-FurysAddonsMenu.html), a free library like LibAddonMenu-2.0. Minion 3 does not install libraries for you, so if the addon stops loading after this update, install it from the link or in Minion.
+
 Every item you own in one list: every character's bags and gear, the bank, the craft bag, house storage,
 the Furniture Vault, furniture placed in your houses, and your currencies. See it all on a summary page
 with running currency totals, copy it in game, or export it to Excel.
 
-**Requires:** LibAddonMenu-2.0 (version 43 or newer). Install it separately; without it the addon will not load.
+**Requires:** LibAddonMenu-2.0 (version 43 or newer) and [Fury's Addons Menu](https://www.esoui.com/downloads/info5126-FurysAddonsMenu.html) (version 1.3.0 or newer), which gives all of Fury's addons the Fury sidebar and `/fury`. Both are separate downloads: search for them in Minion (Minion 3 does not install libraries for you) or get them from ESOUI. Without them, this addon will not load.
 
-**Optional:** Fury's Addons Menu (version 1.3.0 or newer) adds the Fury sidebar: `/fury`, a slim bar with one icon per Fury addon, and the other Fury addons' icons in this addon's title bar. Without it, this addon works the same, just without those.
 
 ## What it lists
 
