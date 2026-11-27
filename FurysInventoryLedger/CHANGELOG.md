@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.8
+- The manifest lists Fury's Addons Menu as an optional library without a version check, as ESOUI asks (the game does not check versions there).
+
 ## 1.7.7
 - **The Fury sidebar now lives in Fury's Addons Menu.** The sidebar, the `/fury` list and the other Fury addons' icons in the title bar used to be copied into every Fury addon; that code now lives only in the optional library Fury's Addons Menu (1.3.0 or newer), as the ESOUI team suggested. With the library installed nothing changes for you and your sidebar settings carry over. Without it, this addon works the same, just without the sidebar, `/fury` and those title-bar icons.
 
