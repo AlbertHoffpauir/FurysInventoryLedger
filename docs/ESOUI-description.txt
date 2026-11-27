@@ -88,7 +88,7 @@ The change columns compare against a total saved once a day (at logout, reload, 
 [*]Download the [B][URL="https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-WindowsTools-1.5.0.zip"]Windows tools zip[/URL][/B] and unzip it anywhere, for example Documents\Elder Scrolls Online. It is a separate download because ESOUI addon zips may only hold addon files. In game, the [B]Get the Windows tools[/B] button under [FONT="Courier New"][B]/ledger settings[/B][/FONT] (or [FONT="Courier New"][B]/ledger tools[/B][/FONT]) opens the download page in your browser.
 [*]Double-click [B]ExportToExcel.cmd[/B]. It writes [B]ESO Inventory <date time>.csv[/B] to your Desktop and opens it.
 [/LIST]
-[B]Keep the Excel file ready[/B] is a setting that starts turned off. When it is on, the full list is saved every time you log out, reload or change zone, so step 1 is not needed; it about doubles the size of the addon's saved file. If you used the addon before 1.5.0 it is on for you, as before.
+[B]Keep the Excel file ready[/B] is a setting that starts turned off. When it is on, the full list is saved every time you log out, switch characters or reload, so step 1 is not needed; it about doubles the size of the addon's saved file. If you used the addon before 1.5.0 it is on for you, as before.
 Tip: right-click [B]ExportToExcel.cmd[/B] > Send to > Desktop (create shortcut) to run it from your desktop.
 [B]What the script does[/B]
 [SPOILER]
