@@ -20,7 +20,7 @@ ESO gives you no list of what you own. Here, the [B]copy window[/B] puts every i
 [*][COLOR="#A08CFF"][B]Your data stays home.[/B][/COLOR]  Saved per account and megaserver on your PC. Nothing leaves it.
 [/LIST]
 [B]Requires:[/B] [URL="https://www.esoui.com/downloads/info7-LibAddonMenu.html"]LibAddonMenu-2.0[/URL] (version 43 or newer). Install it separately, from the link or by searching for LibAddonMenu in Minion. Without it, this addon will not load.
-[B]Optional:[/B] [B]Fury's Addons Menu[/B] (version 1.2.0 or newer) adds a key for the Fury sidebar and remembers the sidebar's settings. Without it, [FONT="Courier New"][B]/fury[/B][/FONT] and the sidebar still work.
+[B]Optional:[/B] [B]Fury's Addons Menu[/B] (version 1.3.0 or newer) adds the Fury sidebar: [FONT="Courier New"][B]/fury[/B][/FONT], a slim bar with one icon per Fury addon, and the other Fury addons' icons in this addon's title bar. Without it, this addon works the same, just without those.
 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]At a glance[/B][/COLOR][/FONT][/SIZE]
 [QUOTE][LIST]

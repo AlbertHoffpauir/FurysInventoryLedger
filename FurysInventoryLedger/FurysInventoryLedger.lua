@@ -7,7 +7,7 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.7.6"
+FIL.version = "1.7.7"
 -- The Windows tools (Excel export) can't ship in the ESOUI zip; this page has the download.
 FIL.toolsUrl = "https://github.com/AlbertHoffpauir/FurysInventoryLedger#downloads"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"

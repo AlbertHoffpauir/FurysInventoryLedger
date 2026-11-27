@@ -6,7 +6,7 @@ An Elder Scrolls Online addon: every item you own in one list. Every character's
 
 ## Downloads
 
-- **The addon:** get it from ESOUI or Minion. The same files are in [`FurysInventoryLedger/`](FurysInventoryLedger/) here, and as [FurysInventoryLedger-1.7.6.zip](https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-1.7.6.zip). It needs LibAddonMenu-2.0; Fury's Addons Menu is optional (it adds a key for the Fury sidebar). Both are free on ESOUI and in Minion.
+- **The addon:** get it from ESOUI or Minion. The same files are in [`FurysInventoryLedger/`](FurysInventoryLedger/) here, and as [FurysInventoryLedger-1.7.7.zip](https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-1.7.7.zip). It needs LibAddonMenu-2.0; Fury's Addons Menu is optional (it adds the Fury sidebar and `/fury`). Both are free on ESOUI and in Minion.
 - **Windows Tools** (optional): Excel export. **[Download FurysInventoryLedger-WindowsTools-1.5.0.zip](https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-WindowsTools-1.5.0.zip)**. Unzip it into any folder, for example Documents\Elder Scrolls Online. Source: [`WindowsTools/`](WindowsTools/), and [README.txt](WindowsTools/README.txt) says what every file does.
 
 The tools are plain-text scripts (batch, PowerShell). They only read the addon's saved data file on your PC, write one CSV to your Desktop, and never connect to the internet.
