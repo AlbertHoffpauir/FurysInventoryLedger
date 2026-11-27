@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.6
+- **Fury's Addons Menu is now a separate library.** The Fury sidebar's key and saved settings used to ship as a small folder inside every Fury addon. At the request of the ESOUI team it is now its own download, Fury's Addons Menu. It is optional: install it to keep the sidebar's key and to have the sidebar remember its settings. Without it, `/fury` and the sidebar still work. Your sidebar settings and your key carry over once it is installed.
+
 ## 1.7.5
 - **Lighter loading screens.** With "Keep the Excel file ready" on, the addon rebuilt the whole Excel list (thousands of rows, every character and account) at every loading screen after anything in your bags changed. On a recruit tour or a writ run that meant heavy work at each port, the moment the game is busiest. The list and the daily totals are now built only when you log out, switch characters, quit or reload, which is when the game writes them to your PC anyway. The Excel file is the same as before.
 

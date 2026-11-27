@@ -1,9 +1,10 @@
 -- Fury Night: the shared library of Fury's addons. Look (colors, fonts, window header, tabs,
 -- Start here page), chat lines, the welcome line, confirm pop-ups, "More from Fury" and the
 -- Fury sidebar and addons list (/fury). The same file ships in every Fury addon, so they all look and behave
--- the same. Only the six lines below differ: it hangs off that addon's own table, so no addon
--- depends on another one being installed. Its one global, FurysAddonMenu, is the list the
--- installed Fury addons put themselves on for the menu.
+-- the same. Only the six lines below differ: it hangs off that addon's own table, so no Fury addon
+-- depends on another Fury addon being installed. The optional library Fury's Addons Menu
+-- (FurysAddonMenu) adds the sidebar's key and saves its settings; its one global, FurysAddonMenu,
+-- is the list the installed Fury addons put themselves on for the menu.
 
 local A = FurysInventoryLedger
 local GLYPH = "EsoUI/Art/MainMenu/menuBar_inventory_up.dds"
@@ -50,7 +51,7 @@ end
 -- Which version of this shared file an addon carries. Raise it with every change to the file,
 -- then copy the file into every addon.
 ------------------------------------------------------------------------------
-T.LIB = 12
+T.LIB = 13
 
 ------------------------------------------------------------------------------
 -- Chat: every line an addon prints starts with its name in violet, "[Guild Toolset] text".
@@ -446,13 +447,13 @@ end
 -- The list (/fury menu, or the gear at the bottom of the sidebar) is a small window with every
 -- installed Fury addon, an Open and a Settings button each, and the sidebar's options.
 --
--- The key and the sidebar's saved settings live in the small FurysAddonMenu folder that ships
--- inside every Fury addon; the game loads the folder once, so the key shows once however many
--- Fury addons are installed. Each addon's copy of this file puts that addon on the shared list
+-- The key and the sidebar's saved settings live in the optional library Fury's Addons Menu
+-- (FurysAddonMenu), a download of its own, so the key shows once however many Fury addons are
+-- installed. Without it, /fury and the sidebar still work, but the sidebar's settings last only
+-- until the next reload and there is no key. Each addon's copy of this file puts that addon on the shared list
 -- (FurysAddonMenu.entries), so an addon never has to know the names of the others. The newest
 -- copy of this file among the installed addons builds the sidebar and the list.
 ------------------------------------------------------------------------------
-local MENU_GLOBAL = "FurysAddonMenu"
 local MENU_WIDTH, MENU_ROW = 600, 40
 local MENU_HELP = "Type /fury, or press the key (Controls > Keybindings > Fury's Addons), to show or hide the sidebar. /fury menu opens this window."
 local BAR_NAME = "Fury's Addons"
@@ -461,15 +462,16 @@ local BAR_SMALL = { icon = 28, pad = 2, grip = 12 }
 local BAR_BIG = { icon = 40, pad = 5, grip = 12 }
 local BAR_FALLBACK = "EsoUI/Art/MainMenu/menuBar_collections_up.dds"
 
-local shared = rawget(_G, MENU_GLOBAL)
+-- The library is an optional dependency, so it may be missing: then the first Fury addon to load
+-- makes the shared list itself.
+local shared = rawget(_G, "FurysAddonMenu")
 if not shared then
     shared = { entries = {}, lib = 0 }
-    _G[MENU_GLOBAL] = shared
+    _G["FurysAddonMenu"] = shared
 end
 shared.entries[MENU_NAME] = { name = MENU_NAME, open = MenuOpen, settings = MenuSettings, glyph = GLYPH }
 
--- The sidebar's settings. The FurysAddonMenu folder saves them; without it they last until the
--- next reload.
+-- The sidebar's settings, saved by the library Fury's Addons Menu when it is installed.
 local function BarSaved()
     if not shared.sv then shared.sv = {} end
     return shared.sv
