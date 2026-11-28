@@ -3,7 +3,8 @@
 -- addon's place in the Fury sidebar. The same file ships in every Fury addon, so they all
 -- look and behave the same. Only the six lines below differ: it hangs off that addon's own table,
 -- so no Fury addon depends on another Fury addon being installed. The Fury sidebar itself comes
--- from the library Fury's Addons Menu (FurysAddonMenu), which every Fury addon requires.
+-- from the library Fury's Addons Menu (FurysAddonMenu), which is optional: without it there is
+-- no sidebar, no /fury and no title-bar icons, and the addon works as before.
 
 local A = FurysInventoryLedger
 local GLYPH = "EsoUI/Art/MainMenu/menuBar_inventory_up.dds"
@@ -50,7 +51,7 @@ end
 -- Which version of this shared file an addon carries. Raise it with every change to the file,
 -- then copy the file into every addon.
 ------------------------------------------------------------------------------
-T.LIB = 16
+T.LIB = 17
 
 ------------------------------------------------------------------------------
 -- Chat: every line an addon prints starts with its name in violet, "[Guild Toolset] text".
@@ -456,16 +457,19 @@ end
 
 ------------------------------------------------------------------------------
 -- The Fury sidebar, the Fury addons list (/fury) and the other Fury addons' icons in each window's
--- title bar live in the library Fury's Addons Menu (FurysAddonMenu), which every Fury addon
--- requires. This addon only puts itself on its list.
+-- title bar live in the library Fury's Addons Menu (FurysAddonMenu). It is optional (LIB 17): when
+-- it is installed this addon puts itself on its list; when it is not, nothing here runs.
 ------------------------------------------------------------------------------
-FurysAddonMenu:Register({ name = MENU_NAME, glyph = GLYPH, open = MenuOpen, settings = MenuSettings })
+if FurysAddonMenu then
+    FurysAddonMenu:Register({ name = MENU_NAME, glyph = GLYPH, open = MenuOpen, settings = MenuSettings })
+end
 
 -- The other installed Fury addons as a row of small icons in a window's title bar, between its
 -- name and its version. `rightOf` is the leftmost control on the right side of the title bar,
 -- `reserve` extra width to keep free left of it, `start` the Start here button when T.StartButton
--- did not make it. Call it after T.SetTitle.
+-- did not make it. Call it after T.SetTitle. Without Fury's Addons Menu the title stays as it is.
 function T.TitleIcons(win, rightOf, start, reserve)
+    if not FurysAddonMenu then return end
     local info = win.furyTitle
     FurysAddonMenu:TitleIcons(win, {
         skip = MENU_NAME,

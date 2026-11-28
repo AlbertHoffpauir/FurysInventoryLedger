@@ -11,7 +11,7 @@
 [SIZE="3"][COLOR="#5CC2FF"][I]Everything you own, everywhere you keep it, in one ledger.[/I][/COLOR][/SIZE][/CENTER]
 [CENTER][SIZE="1"][COLOR="#B4B0D8"]FURY'S ADDONS[/COLOR]   [URL="https://www.esoui.com/downloads/info5063.html"]Guild Toolset[/URL]   |   [URL="https://www.esoui.com/downloads/info5078.html"]Character Tracker[/URL]   |   [COLOR="#A08CFF"][B]Inventory Ledger[/B][/COLOR]   |   [URL="https://www.esoui.com/downloads/info5106.html"]Account Sync[/URL]   |   [URL="https://www.esoui.com/downloads/info5115.html"]Quality of Life[/URL]   |   [URL="https://www.esoui.com/downloads/info5126-FurysAddonsMenu.html"]Addons Menu[/URL][/SIZE][/CENTER]
 
-[QUOTE][COLOR="#5CC2FF"][B]New:[/B][/COLOR] this addon now requires [URL="https://www.esoui.com/downloads/info5126-FurysAddonsMenu.html"]Fury's Addons Menu[/URL], a free library like LibAddonMenu-2.0. Minion 3 does not install libraries for you, so if the addon stops loading after this update, install it from the link or in Minion.[/QUOTE]
+[QUOTE][COLOR="#5CC2FF"][B]Update:[/B][/COLOR] [URL="https://www.esoui.com/downloads/info5126-FurysAddonsMenu.html"]Fury's Addons Menu[/URL] is optional again. This addon works without it; with it you still get the Fury sidebar and [FONT="Courier New"][B]/fury[/B][/FONT]. It is being replaced by Fury's Command Center soon.[/QUOTE]
 [B]Know what you have and where it is.[/B] Every character's bags and gear, the bank, the craft bag, house storage, the Furniture Vault, furniture placed in your houses, and your currencies. See it all on a summary page with running currency totals, copy it in game, or export it to Excel.
 [QUOTE][SIZE="3"][COLOR="#5CC2FF"][B]Get your data out of the game[/B][/COLOR][/SIZE]
 ESO gives you no list of what you own. Here, the [B]copy window[/B] puts every item on every character, in the bank, craft bag, coffers, Furniture Vault and houses into text that pastes straight into Excel columns, and the [B]Excel export[/B] writes it all to one CSV with 24 columns.[/QUOTE]
@@ -20,7 +20,9 @@ ESO gives you no list of what you own. Here, the [B]copy window[/B] puts every i
 [*][COLOR="#A08CFF"][B]Read only.[/B][/COLOR]  It never moves, sells or changes an item. It only reads what the game shows you.
 [*][COLOR="#A08CFF"][B]Your data stays home.[/B][/COLOR]  Saved per account and megaserver on your PC. Nothing leaves it.
 [/LIST]
-[B]Requires:[/B] [URL="https://www.esoui.com/downloads/info7-LibAddonMenu.html"]LibAddonMenu-2.0[/URL] (version 43 or newer) and [URL="https://www.esoui.com/downloads/info5126-FurysAddonsMenu.html"][B]Fury's Addons Menu[/B][/URL] (version 1.3.0 or newer), which gives all of Fury's addons the Fury sidebar and [FONT="Courier New"][B]/fury[/B][/FONT]. Both are separate downloads: get them from the links, or search for them in Minion (Minion 3 does not install libraries for you). Without them, this addon will not load.
+[B]Requires:[/B] [URL="https://www.esoui.com/downloads/info7-LibAddonMenu.html"]LibAddonMenu-2.0[/URL] (version 43 or newer). It is a separate download: get it from the link, or search for it in Minion (Minion 3 does not install libraries for you). Without it, this addon will not load.
+
+[B]Optional:[/B] [URL="https://www.esoui.com/downloads/info5126-FurysAddonsMenu.html"]Fury's Addons Menu[/URL] gives all of Fury's addons the Fury sidebar and [FONT="Courier New"][B]/fury[/B][/FONT]. It is being replaced by Fury's Command Center soon.
 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]At a glance[/B][/COLOR][/FONT][/SIZE]
 [QUOTE][LIST]
@@ -33,7 +35,7 @@ ESO gives you no list of what you own. Here, the [B]copy window[/B] puts every i
 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]Getting started[/B][/COLOR][/FONT][/SIZE]
 [LIST=1]
-[*]Install [B]LibAddonMenu-2.0[/B] and [B]Fury's Addons Menu[/B] (see Requires above).
+[*]Install [B]LibAddonMenu-2.0[/B] (see Requires above).
 [*]Log in on each character once. Open each house coffer and the Furniture Vault once, and visit the houses you own. The summary page lists what is [B]Still to read[/B], so you do not have to remember.
 [*]Type [FONT="Courier New"][B]/ledger[/B][/FONT] for the summary, or bind a key under Controls > Addon Keybinds > Fury's Inventory Ledger.
 [/LIST]

@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.8.2
+- **Fury's Addons Menu is now optional.** This addon no longer needs it to load. With it installed you still get the Fury sidebar, `/fury` and the title-bar icons; without it everything else works the same. Fury's Addons Menu is being replaced by Fury's Command Center soon.
+
 ## 1.8.1
 - **Fixes game crashes during writ runs.** Every item change (each writ you hand in, each loot) made the addon read your whole backpack, craft bag and wallet again a moment later, and again at every loading screen. On a writ run that meant heavy work every few seconds, and the game could crash. Now a change only notes what changed. Everything is read in one go when you open the summary, the copy window, Find or the tooltip line, and when you log out, switch characters, quit or reload. What the addon shows and saves is the same as before. The full read when you log in is split into parts too: the bank, then your bags and wallet, then the craft bag, then storage, one part every half second instead of all at once.
 
