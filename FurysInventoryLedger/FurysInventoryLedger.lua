@@ -7,7 +7,7 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.8.0"
+FIL.version = "1.8.1"
 -- The Windows tools (Excel export) can't ship in the ESOUI zip; this page has the download.
 FIL.toolsUrl = "https://github.com/AlbertHoffpauir/FurysInventoryLedger#downloads"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
@@ -20,8 +20,9 @@ ZO_CreateStringId("SI_BINDING_NAME_FURYSINVENTORYLEDGER_COPY", "Open/close the c
 local ACCOUNT_OWNER = "(Account)"
 local ROW_MARKER    = "FIL|"     -- prefix on each saved export row, so the PowerShell exporter can find them
 local PAGE_CHARS    = 28000      -- in-game copy window page size (the edit box tops out around 32k)
-local SCAN_DELAY_MS = 1500       -- debounce for rescans after inventory changes
 local HOUSE_DELAY_MS = 4000      -- give placed furniture time to load after zoning into a house
+local STEP_MS = 500              -- 1.8.1: the login read does one part, then waits this long before the next
+local FIRST_STEP_MS = 2000       -- and starts this long after the loading screen
 
 local TAG = "|cA08CFF"   -- Fury Night violet (Theme.lua)
 local function Msg(text, ...)
@@ -354,33 +355,87 @@ end
 local openStorageBag = nil
 local pending = {}
 
+-- 1.8.1: an item or currency change only notes WHAT changed (a flag, nothing else). The bags are read
+-- again later, all at once: when you open the summary, the copy window, Find or a tooltip line, and
+-- on the way out of the game (logout, character switch, quit, reload). Before, every change (each
+-- writ hand-in, each loot) re-read the whole backpack, the craft bag and the wallet 1.5 seconds
+-- later, and again at every loading screen. On a writ run that was heavy work every few seconds.
+local function HasPending()
+    return next(pending) ~= nil
+end
+
 local function FlushPending()
     EVENT_MANAGER:UnregisterForUpdate(FIL.name .. "Debounce")
+    EVENT_MANAGER:UnregisterForUpdate(FIL.name .. "Steps")
+    if not HasPending() then return end
     if pending.char then ScanCharacterBags(); ScanCurrencies() end
     if pending.cur and not pending.char then ScanCurrencies() end
     if pending.bank then ScanBank() end
     if pending.craft then ScanCraftBag() end
     if pending.storage and openStorageBag then ScanStorageBag(openStorageBag) end
+    if pending.storageAll then ScanStorageIfReadable() end
     if pending.house then ScanPlacedFurniture() end
     charRec.updated = GetTimeStamp()
     pending = {}
 end
 
-local function Queue(what, delay)
+-- 1.8.1: the full read at login, in parts. One part (the bank, then your bags and wallet, then the
+-- craft bag, then readable storage) every half second instead of all of it in one go. Anything
+-- that needs the data before it is done (the summary, logout) reads the rest at once.
+local STEP_ORDER = { "bank", "char", "craft", "storageAll" }
+
+local function ReadOnePart()
+    for _, what in ipairs(STEP_ORDER) do
+        if pending[what] then
+            pending[what] = nil
+            if what == "bank" then ScanBank()
+            elseif what == "char" then ScanCharacterBags(); ScanCurrencies(); pending.cur = nil
+            elseif what == "craft" then ScanCraftBag()
+            else ScanStorageIfReadable() end
+            charRec.updated = GetTimeStamp()
+            return
+        end
+    end
+    EVENT_MANAGER:UnregisterForUpdate(FIL.name .. "Steps")
+end
+
+local function ReadInParts()
+    for _, what in ipairs(STEP_ORDER) do pending[what] = true end
+    EVENT_MANAGER:UnregisterForUpdate(FIL.name .. "Steps")
+    EVENT_MANAGER:RegisterForUpdate(FIL.name .. "Steps", FIRST_STEP_MS, function()
+        EVENT_MANAGER:UnregisterForUpdate(FIL.name .. "Steps")
+        ReadOnePart()
+        EVENT_MANAGER:RegisterForUpdate(FIL.name .. "Steps", STEP_MS, ReadOnePart)
+    end)
+end
+
+-- Notes that something needs reading again. No timer and no reading here.
+local function Mark(what)
     pending[what] = true
+end
+
+-- Placed furniture can only be read while you are in the house, so it still gets a short timer.
+local function QueueHouse(delay)
+    pending.house = true
     EVENT_MANAGER:UnregisterForUpdate(FIL.name .. "Debounce")
-    EVENT_MANAGER:RegisterForUpdate(FIL.name .. "Debounce", delay or SCAN_DELAY_MS, FlushPending)
+    EVENT_MANAGER:RegisterForUpdate(FIL.name .. "Debounce", delay, function()
+        EVENT_MANAGER:UnregisterForUpdate(FIL.name .. "Debounce")
+        if pending.house then
+            pending.house = nil
+            ScanPlacedFurniture()
+        end
+    end)
 end
 
 local function OnSlotUpdate(_, bagId)
     if bagId == BAG_BACKPACK or bagId == BAG_WORN or bagId == BAG_COMPANION_WORN then
-        Queue("char")
+        Mark("char")
     elseif bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK then
-        Queue("bank")
+        Mark("bank")
     elseif bagId == BAG_VIRTUAL then
-        Queue("craft")
+        Mark("craft")
     elseif bagId == openStorageBag then
-        Queue("storage")
+        Mark("storage")
     end
 end
 
@@ -389,7 +444,7 @@ local function OnOpenBank(_, bankBag)
         openStorageBag = bankBag
         ScanStorageBag(bankBag)
     else
-        ScanBank()
+        Mark("bank")
     end
 end
 
@@ -397,30 +452,30 @@ local function OnCloseBank()
     if openStorageBag then
         ScanStorageBag(openStorageBag)
         openStorageBag = nil
+        pending.storage = nil
     end
-    ScanBank()
 end
 
 -- The full read happens once per login or reload. After that the item, bank and currency
--- events keep everything current, so a zone change costs nothing.
+-- events only note what changed, and it is read when it is needed (see FlushPending).
 local firstActivation = true
 
 local function OnPlayerActivated()
     if firstActivation then
         firstActivation = false
-        ScanEverythingReadable()
+        ReadInParts()
         -- 1.6.2: one line on a new install, like every Fury addon.
         if FIL.newInstall then
             FIL.Theme.Welcome(SV, "welcomeShown", "Welcome! Type /ledger for the summary of everything you own; its Start here button explains it in one page. Everything starts turned off.")
         end
     end
     if GetCurrentZoneHouseId() ~= 0 and IsOwnerOfCurrentHouse() then
-        Queue("house", HOUSE_DELAY_MS)
+        QueueHouse(HOUSE_DELAY_MS)
     end
 end
 
 local function OnFurnitureChanged()
-    if IsOwnerOfCurrentHouse() then Queue("house", 3000) end
+    if IsOwnerOfCurrentHouse() then QueueHouse(3000) end
 end
 
 ------------------------------------------------------------------------------
@@ -589,12 +644,15 @@ local function SaveBeforeExit()
     dirty = false
 end
 
--- Runs at every loading screen too: only the quick work here. The first one of the day still
--- writes today's totals, so the change columns have a day to compare with.
+-- Runs at every loading screen. 1.8.1: no reading here at all, the game is busy loading. Only
+-- furniture you just moved is read, because it can't be read once you have left the house.
+-- Today's totals are written on the way out of the game (SaveBeforeExit).
 local function OnDeactivated()
-    FlushPending()
-    local today = os.date("%Y-%m-%d", GetTimeStamp())
-    if not (acct.history and acct.history[today]) then FIL.RecordSnapshot() end
+    if pending.house then
+        EVENT_MANAGER:UnregisterForUpdate(FIL.name .. "Debounce")
+        pending.house = nil
+        ScanPlacedFurniture()
+    end
 end
 
 local RELOAD_TEXT = "<<1>> rows are ready for Excel. The game only writes them to your PC when the interface reloads or you log out.\n\nReload the interface now? You get a short loading screen. After it, run ExportToExcel.cmd from the Windows tools."
@@ -996,6 +1054,7 @@ FIL.CollectibleLabel = CollectibleLabel
 FIL.LinkInfo      = LinkInfo
 FIL.FormatTime    = FormatTime
 FIL.FlushPending  = FlushPending
+FIL.HasPending    = HasPending
 FIL.Msg           = Msg
 function FIL.GetAccount() return acct end
 function FIL.GetAllAccounts() return SV.accounts end
@@ -1053,7 +1112,7 @@ local function OnLoaded(_, addonName)
     -- that fire constantly in combat and never change what you own.
     EVENT_MANAGER:AddFilterForEvent(FIL.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
     -- Gold, AP, Tel Var, vouchers and the rest: keep the wallet current for the summary's running totals.
-    EVENT_MANAGER:RegisterForEvent(FIL.name, EVENT_CURRENCY_UPDATE, function() Queue("cur") end)
+    EVENT_MANAGER:RegisterForEvent(FIL.name, EVENT_CURRENCY_UPDATE, function() Mark("cur") end)
     EVENT_MANAGER:RegisterForEvent(FIL.name, EVENT_OPEN_BANK, OnOpenBank)
     EVENT_MANAGER:RegisterForEvent(FIL.name, EVENT_CLOSE_BANK, OnCloseBank)
     EVENT_MANAGER:RegisterForEvent(FIL.name, EVENT_HOUSING_FURNITURE_PLACED, OnFurnitureChanged)

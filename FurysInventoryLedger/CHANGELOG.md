@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.8.1
+- **Fixes game crashes during writ runs.** Every item change (each writ you hand in, each loot) made the addon read your whole backpack, craft bag and wallet again a moment later, and again at every loading screen. On a writ run that meant heavy work every few seconds, and the game could crash. Now a change only notes what changed. Everything is read in one go when you open the summary, the copy window, Find or the tooltip line, and when you log out, switch characters, quit or reload. What the addon shows and saves is the same as before. The full read when you log in is split into parts too: the bank, then your bags and wallet, then the craft bag, then storage, one part every half second instead of all at once.
+
 ## 1.8.0
 - **Prepare the Excel file is on the summary window now**, next to the copy button, so you don't have to open the settings for it. It still asks before it reloads the interface. The copy button is now called **Export / Copy**, like the Guild Toolset buttons.
 - **Lighter logout with "Keep the Excel file ready" on.** The list is only rebuilt when something you own actually changed, and then only the bags, banks and houses that changed are redone. Logging out after a session where nothing changed does no Excel work at all.
