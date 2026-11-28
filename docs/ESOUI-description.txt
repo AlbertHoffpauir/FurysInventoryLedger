@@ -74,7 +74,7 @@ ESO gives you no list of what you own. Here, the [B]copy window[/B] puts every i
 The change columns compare against a total saved once a day (at logout, reload, zoning and when you open the summary), so they fill in from your second day. If there is no total from exactly yesterday or 7 days ago, the heading shows the date it compares to instead. Totals are kept for 120 days. Rises show in green, drops in rose, and gold in gold with the game's coin icon.
 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]Copy window[/B][/COLOR][/FONT][/SIZE]
-[COLOR="#B4B0D8"][I][FONT="Courier New"][B]/ledger copy[/B][/FONT], or Copy for Excel on the summary[/I][/COLOR]
+[COLOR="#B4B0D8"][I][FONT="Courier New"][B]/ledger copy[/B][/FONT], or Export / Copy on the summary[/I][/COLOR]
 [LIST]
 [*]Click [B]Select All[/B], press Ctrl+C, and paste into Excel. Tab-separated text pastes straight into columns.
 [*]The [B]List[/B] picker narrows it to this account, one character or one kind of place, and [B]Type[/B] to one item type.
@@ -85,11 +85,11 @@ The change columns compare against a total saved once a day (at logout, reload, 
 [SIZE="4"][FONT="Georgia"][COLOR="#5CC2FF"][B]Export to Excel[/B][/COLOR][/FONT][/SIZE]
 [COLOR="#B4B0D8"][I]Windows, separate download. The addon works fully in game without it.[/I][/COLOR]
 [LIST=1]
-[*]In game, click [B]Prepare the Excel file[/B] under [FONT="Courier New"][B]/ledger settings[/B][/FONT] (or type [FONT="Courier New"][B]/ledger export[/B][/FONT]). It builds the full list and asks before it reloads the interface, because the game only writes its saved data when it reloads or you log out.
+[*]In game, click [B]Prepare the Excel file[/B] on the summary or under [FONT="Courier New"][B]/ledger settings[/B][/FONT] (or type [FONT="Courier New"][B]/ledger export[/B][/FONT]). It builds the full list and asks before it reloads the interface, because the game only writes its saved data when it reloads or you log out.
 [*]Download the [B][URL="https://github.com/AlbertHoffpauir/FurysInventoryLedger/raw/main/downloads/FurysInventoryLedger-WindowsTools-1.5.0.zip"]Windows tools zip[/URL][/B] and unzip it anywhere, for example Documents\Elder Scrolls Online. It is a separate download because ESOUI addon zips may only hold addon files. In game, the [B]Get the Windows tools[/B] button under [FONT="Courier New"][B]/ledger settings[/B][/FONT] (or [FONT="Courier New"][B]/ledger tools[/B][/FONT]) opens the download page in your browser.
 [*]Double-click [B]ExportToExcel.cmd[/B]. It writes [B]ESO Inventory <date time>.csv[/B] to your Desktop and opens it.
 [/LIST]
-[B]Keep the Excel file ready[/B] is a setting that starts turned off. When it is on, the full list is saved every time you log out, switch characters or reload, so step 1 is not needed; it about doubles the size of the addon's saved file. If you used the addon before 1.5.0 it is on for you, as before.
+[B]Keep the Excel file ready[/B] is a setting that starts turned off. When it is on, the full list is saved again when you log out, switch characters or reload and anything you own changed, so step 1 is not needed; it about doubles the size of the addon's saved file. If you used the addon before 1.5.0 it is on for you, as before.
 Tip: right-click [B]ExportToExcel.cmd[/B] > Send to > Desktop (create shortcut) to run it from your desktop.
 [B]What the script does[/B]
 [SPOILER]

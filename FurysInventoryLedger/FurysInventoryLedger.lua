@@ -7,7 +7,7 @@ local FIL = FurysInventoryLedger
 
 FIL.name    = "FurysInventoryLedger"
 FIL.title   = "Fury's Inventory Ledger"
-FIL.version = "1.7.9"
+FIL.version = "1.8.0"
 -- The Windows tools (Excel export) can't ship in the ESOUI zip; this page has the download.
 FIL.toolsUrl = "https://github.com/AlbertHoffpauir/FurysInventoryLedger#downloads"
 FIL.COPY_SCENE    = "FurysInventoryLedgerCopy"
@@ -62,8 +62,11 @@ local function EnumString(prefix, value, noneValue)
     return s or ""
 end
 
--- Set by every read; the saved Excel list and the daily totals are only rebuilt when it is set.
+-- Set by every read; the daily totals are only rebuilt when it is set.
 local dirty = true
+-- 1.8.0: set only when what you own really changed (an item, a count, a character), not by a
+-- read that found the same things. The saved Excel list is only rebuilt when it is set.
+local exportDirty = false
 
 local function NewContainer(owner, location, container)
     dirty = true
@@ -135,6 +138,23 @@ local function Items(cont)
     return items
 end
 
+-- Puts a freshly read container in place. When it holds exactly what the old one held, the
+-- Excel list does not need a rebuild for it.
+local function SameContents(a, b)
+    if not a or not b or not a.p or not b.p or #a.p ~= #b.p then return false end
+    if a.owner ~= b.owner or a.location ~= b.location or a.container ~= b.container then return false end
+    for i = 1, #a.p do
+        if a.p[i] ~= b.p[i] then return false end
+    end
+    return true
+end
+
+local function Store(tbl, key, cont)
+    Seal(cont)
+    if not SameContents(tbl[key], cont) then exportDirty = true end
+    tbl[key] = cont
+end
+
 -- Adds one stack to a container, merging identical items (same link, bound and stolen state).
 local function AddItem(cont, index, link, qty, bound, stolen)
     if not link or link == "" or not qty or qty <= 0 then return end
@@ -191,18 +211,18 @@ local function ScanCharacterBags()
     local c = NewContainer(name, "Character", "Backpack")
     ReadBag(c, BAG_BACKPACK)
     c.size, c.used = GetBagSize(BAG_BACKPACK), GetNumBagUsedSlots(BAG_BACKPACK)
-    charRec.containers.backpack = Seal(c)
+    Store(charRec.containers, "backpack", c)
 
     c = NewContainer(name, "Character", "Equipped")
     ReadBag(c, BAG_WORN)
-    charRec.containers.worn = Seal(c)
+    Store(charRec.containers, "worn", c)
 
     if HasActiveCompanion() then
         local defId = GetActiveCompanionDefId()
         local compName = zo_strformat("<<1>>", GetCompanionName(defId))
         c = NewContainer(name, "Companion", compName .. " (equipped)")
         ReadBag(c, BAG_COMPANION_WORN)
-        charRec.containers["companion_" .. defId] = Seal(c)
+        Store(charRec.containers, "companion_" .. defId, c)
     end
 end
 
@@ -212,13 +232,13 @@ local function ScanBank()
     ReadBag(c, BAG_SUBSCRIBER_BANK, index)
     c.size = GetBagUseableSize(BAG_BANK) + GetBagUseableSize(BAG_SUBSCRIBER_BANK)
     c.used = GetNumBagUsedSlots(BAG_BANK) + GetNumBagUsedSlots(BAG_SUBSCRIBER_BANK)
-    acct.shared.bank = Seal(c)
+    Store(acct.shared, "bank", c)
 end
 
 local function ScanCraftBag()
     local c = NewContainer(ACCOUNT_OWNER, "Craft Bag", "Craft Bag")
     ReadBag(c, BAG_VIRTUAL)
-    acct.shared.craftbag = Seal(c)
+    Store(acct.shared, "craftbag", c)
 end
 
 local function HouseBankBags()
@@ -234,14 +254,14 @@ local function ScanStorageBag(bagId)
         local c = NewContainer(ACCOUNT_OWNER, "Furniture Vault", "Furniture Vault")
         ReadBag(c, bagId)
         c.size, c.used = GetBagSize(bagId), GetNumBagUsedSlots(bagId)
-        acct.shared.vault = Seal(c)
+        Store(acct.shared, "vault", c)
     elseif IsHouseBankBag(bagId) then
         local label = CollectibleLabel(GetCollectibleForBag(bagId))
         if label == "" then label = "Storage " .. (bagId - BAG_HOUSE_BANK_ONE + 1) end
         local c = NewContainer(ACCOUNT_OWNER, "House Storage", label)
         ReadBag(c, bagId)
         c.size, c.used = GetBagSize(bagId), GetNumBagUsedSlots(bagId)
-        acct.shared["housebank_" .. bagId] = Seal(c)
+        Store(acct.shared, "housebank_" .. bagId, c)
     end
 end
 
@@ -284,7 +304,7 @@ local function ScanPlacedFurniture()
         count = count + 1
         fid = GetNextPlacedHousingFurnitureId(fid)
     end
-    acct.shared["house_" .. houseId] = Seal(c)
+    Store(acct.shared, "house_" .. houseId, c)
     return true, houseName, count
 end
 
@@ -314,9 +334,9 @@ local function ScanCurrencies()
             end
         end
     end
-    charRec.containers.wallet = Seal(charC)
-    acct.shared.bankwallet = Seal(bankC)
-    acct.shared.acctwallet = Seal(acctC)
+    Store(charRec.containers, "wallet", charC)
+    Store(acct.shared, "bankwallet", bankC)
+    Store(acct.shared, "acctwallet", acctC)
 end
 
 local function ScanEverythingReadable()
@@ -460,59 +480,91 @@ local function LinkInfo(link)
     return info
 end
 
-local function BuildRows()
-    local rows = {}
-    local function addContainer(acctKey, cont)
-        if not cont then return end
-        local scanned = FormatTime(cont.updated)
-        for _, it in ipairs(Items(cont)) do
-            local r
-            if it.l then
-                local info = LinkInfo(it.l)
-                r = {
-                    acctKey, cont.owner, cont.location, cont.container, info.name, it.q, info.quality or "",
-                    info.itype or "", info.stype or "", info.equip or "", info.gear or "", info.trait or "",
-                    info.set or "", info.style or "", info.level or "", info.cp or "",
-                    it.b and "Yes" or "", it.s and "Yes" or "", info.crafted or "",
-                    info.value, info.value * it.q, info.id or "", scanned, it.l,
-                }
-            else
-                r = {
-                    acctKey, cont.owner, cont.location, cont.container, it.n or "", it.q, "",
-                    it.cur and "Currency" or "Furniture", "", "", "", "", "", "", "", "",
-                    "", "", "", "", "", "", scanned, "",
-                }
-            end
-            for i = 1, #r do r[i] = Clean(r[i]) end
-            rows[#rows + 1] = r
-        end
-    end
+-- 1.8.0: each container's rows are built once per session and kept until the container is
+-- read again with different contents, so a later rebuild only redoes what changed.
+local rowCache = setmetatable({}, { __mode = "k" })   -- container -> { acct, scanned, rows, lines }
 
+local function ContainerRows(acctKey, cont)
+    local cached = rowCache[cont]
+    if cached and cached.acct == acctKey then return cached end
+    local rows = {}
+    local scanned = FormatTime(cont.updated)
+    for _, it in ipairs(Items(cont)) do
+        local r
+        if it.l then
+            local info = LinkInfo(it.l)
+            r = {
+                acctKey, cont.owner, cont.location, cont.container, info.name, it.q, info.quality or "",
+                info.itype or "", info.stype or "", info.equip or "", info.gear or "", info.trait or "",
+                info.set or "", info.style or "", info.level or "", info.cp or "",
+                it.b and "Yes" or "", it.s and "Yes" or "", info.crafted or "",
+                info.value, info.value * it.q, info.id or "", scanned, it.l,
+            }
+        else
+            r = {
+                acctKey, cont.owner, cont.location, cont.container, it.n or "", it.q, "",
+                it.cur and "Currency" or "Furniture", "", "", "", "", "", "", "", "",
+                "", "", "", "", "", "", scanned, "",
+            }
+        end
+        for i = 1, #r do r[i] = Clean(r[i]) end
+        rows[#rows + 1] = r
+    end
+    -- Within a container: by item name, then link, bound and stolen to settle ties.
+    local keys = {}
+    for _, r in ipairs(rows) do keys[r] = table.concat({ r[5], r[LINK_COL], r[17], r[18] }, "\1") end
+    table.sort(rows, function(x, y) return keys[x] < keys[y] end)
+    cached = { acct = acctKey, rows = rows }
+    rowCache[cont] = cached
+    return cached
+end
+
+-- Every container in order (account, owner, location, container). Account-wide containers get
+-- an empty owner so they sort ahead of characters. Sorting a few hundred containers instead of
+-- thousands of rows keeps the rebuild light.
+local function SortedContainers()
+    local list, keys = {}, {}
+    local function add(acctKey, cont)
+        if not cont then return end
+        local owner = (cont.owner == ACCOUNT_OWNER) and "" or ("\2" .. Clean(cont.owner))
+        local entry = ContainerRows(acctKey, cont)
+        list[#list + 1] = entry
+        keys[entry] = table.concat({ Clean(acctKey), owner, Clean(cont.location), Clean(cont.container) }, "\1")
+    end
     for acctKey, a in pairs(SV.accounts) do
         for _, ch in pairs(a.chars) do
-            for _, cont in pairs(ch.containers) do addContainer(acctKey, cont) end
+            for _, cont in pairs(ch.containers) do add(acctKey, cont) end
         end
-        for _, cont in pairs(a.shared) do addContainer(acctKey, cont) end
+        for _, cont in pairs(a.shared) do add(acctKey, cont) end
     end
+    table.sort(list, function(x, y) return keys[x] < keys[y] end)
+    return list
+end
 
-    -- One sort key per row (account, owner, location, container, item), built once.
-    -- Account-wide rows get an empty owner so they sort ahead of characters.
-    local keys = {}
-    for _, r in ipairs(rows) do
-        local owner = (r[2] == ACCOUNT_OWNER) and "" or ("\2" .. r[2])
-        keys[r] = table.concat({ r[1], owner, r[3], r[4], r[5], r[LINK_COL], r[17], r[18] }, "\1")   -- link, bound, stolen settle ties
+local function BuildRows()
+    local rows = {}
+    for _, entry in ipairs(SortedContainers()) do
+        for _, r in ipairs(entry.rows) do rows[#rows + 1] = r end
     end
-    table.sort(rows, function(x, y) return keys[x] < keys[y] end)
     return rows
 end
 
-local function SaveExport(rows)
+-- Writes the Excel list into the saved data. Each container's text lines are kept with its
+-- rows, so an unchanged container costs only a copy. Returns how many item rows it holds.
+local function SaveExport()
     local out = { ROW_MARKER .. table.concat(HEADERS, "\t") }
-    for _, r in ipairs(rows) do
-        out[#out + 1] = ROW_MARKER .. table.concat(r, "\t")
+    for _, entry in ipairs(SortedContainers()) do
+        if not entry.lines then
+            local lines = {}
+            for i, r in ipairs(entry.rows) do lines[i] = ROW_MARKER .. table.concat(r, "\t") end
+            entry.lines = lines
+        end
+        for _, line in ipairs(entry.lines) do out[#out + 1] = line end
     end
     SV.export = out
     SV.exportBuilt = GetTimeStamp()
+    exportDirty = false
+    return #out - 1
 end
 
 -- The saved Excel list doubles the size of the saved file, so it is only kept when the
@@ -524,14 +576,15 @@ local function WantsExport()
 end
 
 -- 1.7.5: the Excel list and the daily totals are built only on the way out of the game
--- (logout, character switch, quit, reload), not at every loading screen. Building thousands of
+-- (logout, character switch, quit, reload), not at every loading screen. 1.8.0: and the list
+-- only when what you own changed, redoing only the containers that changed. Building thousands of
 -- rows at each port (a recruit tour ports every few seconds) is heavy work at the moment the
 -- game is busiest loading the next zone.
 local function SaveBeforeExit()
     FlushPending()
     local today = os.date("%Y-%m-%d", GetTimeStamp())
     local needTotals = dirty or not (acct.history and acct.history[today])
-    if dirty and WantsExport() then SaveExport(BuildRows()) end
+    if exportDirty and WantsExport() then SaveExport() end
     if needTotals then FIL.RecordSnapshot() end
     dirty = false
 end
@@ -551,12 +604,10 @@ local function ReloadLater() Msg("The Excel list will be written the next time y
 -- Builds the list for the Windows tools now, then offers to reload so the game writes it to disk.
 function FIL.PrepareExport()
     FlushPending()
-    local rows = BuildRows()
-    SaveExport(rows)
+    local count = SaveExport()
     exportPrepared = true
-    dirty = false
     -- 1.6.4: the pop-up is the shared one (Theme.lua), the same in every Fury addon.
-    FIL.Theme.Confirm("Fury's Inventory Ledger", zo_strformat(RELOAD_TEXT, ZO_CommaDelimitNumber(#rows)), "Reload now", ReloadNow, ReloadLater)
+    FIL.Theme.Confirm("Fury's Inventory Ledger", zo_strformat(RELOAD_TEXT, ZO_CommaDelimitNumber(count)), "Reload now", ReloadNow, ReloadLater)
 end
 
 local function CsvField(s)
@@ -746,7 +797,7 @@ local settingsPanel
 
 function FIL.SetAutoExport(value)
     SV.settings.autoExport = value
-    if value then dirty = true end
+    if value then dirty = true; exportDirty = true end
 end
 
 local function BuildSettings()
@@ -803,7 +854,7 @@ local function BuildSettings()
           tooltip = "Builds the full list for the Windows tools, then asks before it reloads the interface so the game writes it to your PC.",
           func = function() FIL.PrepareExport() end },
         { type = "checkbox", name = "Keep the Excel file ready",
-          tooltip = "On: the full list is saved again every time you log out, reload or change zone, so the Windows tools always have it. This about doubles the size of the addon's saved file. Off: the list is only saved when you click Prepare the Excel file. Starts turned off on new installs.",
+          tooltip = "On: when you log out or reload, the full list is saved again if anything you own changed, so the Windows tools always have it. This about doubles the size of the addon's saved file. Off: the list is only saved when you click Prepare the Excel file. Starts turned off on new installs.",
           getFunc = function() return SV.settings.autoExport end,
           setFunc = function(value) FIL.SetAutoExport(value) end },
         { type = "button", name = "Get the Windows tools",
@@ -850,6 +901,7 @@ local function Forget(name)
             if id == GetCurrentCharacterId() then Msg("Can't forget the character you're logged in on.") return end
             acct.chars[id] = nil
             dirty = true
+            exportDirty = true
             Msg("Forgot <<1>>.", ch.name)
             return
         end
@@ -871,8 +923,8 @@ local START = {
         "Type part of an item or set name in the Find box (top right) to see how many you own and where, on every character and account.",
     } },
     { title = "3. Get it out of the game", lines = {
-        "Copy for Excel opens the whole list as text: Select All, Ctrl+C, paste into Excel or Google Sheets.",
-        "For the full file, use Prepare the Excel file in the settings (or /ledger export) and the free Windows tools (/ledger tools).",
+        "Export / Copy opens the whole list as text: Select All, Ctrl+C, paste into Excel, Google Sheets or anywhere else.",
+        "For the full file, use Prepare the Excel file on the summary or in the settings (or /ledger export) and the free Windows tools (/ledger tools).",
     } },
     { title = "4. Settings", lines = {
         "The gear at the top right opens the settings. Everything that can be turned off starts turned off, such as the line on item tooltips and keeping the Excel file ready.",
@@ -956,12 +1008,11 @@ local function OnLoaded(_, addonName)
     if addonName ~= FIL.name then return end
     EVENT_MANAGER:UnregisterForEvent(FIL.name, EVENT_ADD_ON_LOADED)
 
-    local newInstall = (FurysInventoryLedger_SV == nil)
-    FurysInventoryLedger_SV = FurysInventoryLedger_SV or {}
-    SV = FurysInventoryLedger_SV
+    local newInstall
+    SV, newInstall = FIL.Theme.SavedVars("FurysInventoryLedger_SV")
     -- Version 2 (1.5.1): items packed one line each. Containers saved by an older build are
     -- packed here once; Seal checks every line and leaves a container alone if it cannot.
-    if (SV.version or 1) < 2 and SV.accounts then
+    if (SV.dataVersion or 1) < 2 and SV.accounts then
         for _, a in pairs(SV.accounts) do
             for _, ch in pairs(a.chars or {}) do
                 for _, cont in pairs(ch.containers or {}) do
@@ -973,7 +1024,7 @@ local function OnLoaded(_, addonName)
             end
         end
     end
-    SV.version  = 2
+    SV.dataVersion = 2
     SV.settings = SV.settings or { sep = "tab" }
     -- New in 1.5.0. Installs from before it always kept the Excel list, so they keep doing so;
     -- new installs start with it turned off.
@@ -983,6 +1034,8 @@ local function OnLoaded(_, addonName)
         SV.export, SV.exportBuilt = nil, nil
     end
     SV.accounts = SV.accounts or {}
+    -- No saved Excel list yet: build one at the next logout if it is wanted.
+    exportDirty = (SV.export == nil)
 
     local acctKey = GetDisplayName() .. " (" .. GetWorldName() .. ")"
     FIL.accountKey = acctKey
@@ -1020,7 +1073,7 @@ local function OnLoaded(_, addonName)
     -- 1.6.2: the same header as every Fury addon (Theme.lua): title and version, Start here
     -- after them, the gear and close button at the right, each with a hover tip.
     local T = FIL.Theme
-    T.SetTitle(FurysInventoryLedgerWindow, FIL.title .. " - Copy for Excel", FIL.version)
+    T.SetTitle(FurysInventoryLedgerWindow, FIL.title .. " - Export / Copy", FIL.version)
     T.SetTitle(FurysInventoryLedgerSummary, FIL.title, FIL.version)
     T.StartButton(FurysInventoryLedgerSummary, FIL.ShowStart,
         "New here? One page on how the ledger works: what it lists, when it reads, the summary and getting it into Excel.\n(also /ledger start)")

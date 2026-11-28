@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.0
+- **Prepare the Excel file is on the summary window now**, next to the copy button, so you don't have to open the settings for it. It still asks before it reloads the interface. The copy button is now called **Export / Copy**, like the Guild Toolset buttons.
+- **Lighter logout with "Keep the Excel file ready" on.** The list is only rebuilt when something you own actually changed, and then only the bags, banks and houses that changed are redone. Logging out after a session where nothing changed does no Excel work at all.
+- **Saved settings now load the standard way** (ZO_SavedVars), as ESOUI's reviewers asked. Your settings are moved over by themselves the first time you log in, so nothing changes for you.
+
 ## 1.7.9
 - **Fury's Addons Menu is now a required library**, like LibAddonMenu-2.0, so it shows in the game's Required Add-Ons list. Install it from ESOUI or Minion (Minion 3 does not install libraries for you). It gives all of Fury's addons the Fury sidebar and `/fury`.
 

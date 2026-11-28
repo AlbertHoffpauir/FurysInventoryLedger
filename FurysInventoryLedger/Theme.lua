@@ -1,5 +1,5 @@
 -- Fury Night: the shared library of Fury's addons. Look (colors, fonts, window header, tabs,
--- Start here page), chat lines, the welcome line, confirm pop-ups, "More from Fury" and this
+-- Start here page), chat lines, the welcome line, saved settings, confirm pop-ups, "More from Fury" and this
 -- addon's place in the Fury sidebar. The same file ships in every Fury addon, so they all
 -- look and behave the same. Only the six lines below differ: it hangs off that addon's own table,
 -- so no Fury addon depends on another Fury addon being installed. The Fury sidebar itself comes
@@ -50,7 +50,7 @@ end
 -- Which version of this shared file an addon carries. Raise it with every change to the file,
 -- then copy the file into every addon.
 ------------------------------------------------------------------------------
-T.LIB = 15
+T.LIB = 16
 
 ------------------------------------------------------------------------------
 -- Chat: every line an addon prints starts with its name in violet, "[Guild Toolset] text".
@@ -71,6 +71,25 @@ function T.Welcome(saved, field, text)
     saved[field] = true
     T.Chat(text)
     return true
+end
+
+-- Saved settings, the standard way: call it in the addon's EVENT_ADD_ON_LOADED (never before) with
+-- the name from the manifest's ## SavedVariables line. One set for the whole PC, as before.
+-- Builds up to November 2026 kept their settings at the top of the file: they are moved into
+-- place the first time, so nothing is lost. The second result is true on a brand-new install.
+function T.SavedVars(svName)
+    local old = _G[svName]
+    local newInstall = old == nil or next(old) == nil
+    local saved = ZO_SavedVars:NewAccountWide(svName, 1, nil, nil, nil, "$AllAccounts")
+    if old then
+        for key, value in pairs(old) do
+            if key ~= "Default" then
+                if key == "version" then saved.dataVersion = value else saved[key] = value end
+                old[key] = nil
+            end
+        end
+    end
+    return saved, newInstall
 end
 
 ------------------------------------------------------------------------------
